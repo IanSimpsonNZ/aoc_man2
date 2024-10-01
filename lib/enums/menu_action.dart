@@ -1,0 +1,4 @@
+enum HomeMenuAction {
+  setRoot,
+  clearPrefs,
+}
