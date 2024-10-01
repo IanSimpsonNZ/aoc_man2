@@ -1,7 +1,7 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:aoc_manager/constants/pref_constants.dart';
+import 'package:file_picker/file_picker.dart';
 // import 'package:path/path.dart' show join;
 // import 'package:path_provider/path_provider.dart'
 //     show getApplicationDocumentsDirectory, MissingPlatformDirectoryException;
@@ -39,6 +39,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final _prefs = SharedPreferencesAsync();
+  String? _rootDir;
+
   int _counter = 0;
 
   void _incrementCounter() {
@@ -60,8 +62,19 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
         actions: <Widget>[
           IconButton(
-            onPressed: () {},
+            onPressed: () async {
+              _rootDir ??= await _prefs.getString(rootDirPrefKey);
+              final selectedDir = await FilePicker.platform.getDirectoryPath(
+                dialogTitle: 'Set root directory',
+                initialDirectory: _rootDir,
+              );
+              if (selectedDir != null) {
+                await _prefs.setString(rootDirPrefKey, selectedDir);
+                _rootDir = selectedDir;
+              }
+            },
             icon: const Icon(Icons.settings),
+            tooltip: 'Set root directory',
           )
         ],
       ),
