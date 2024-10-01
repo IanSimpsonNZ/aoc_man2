@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:numberpicker/numberpicker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:aoc_manager/constants/pref_constants.dart';
+import 'package:aoc_manager/constants/day_constants.dart';
 import 'package:file_picker/file_picker.dart';
 // import 'package:path/path.dart' show join;
 // import 'package:path_provider/path_provider.dart'
@@ -13,7 +15,6 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -40,18 +41,24 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final _prefs = SharedPreferencesAsync();
   String? _rootDir;
+  int _dayNum = minDay;
 
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  Future<String?> getRootDir(String? currentRoot) async {
+    print('${await _prefs.getAll()}');
+    // If root hasn't been set, get the one from prefs (which might also be null)
+    String? rootDir = currentRoot ?? await _prefs.getString(rootDirPrefKey);
+    // getDirectoryPath will take a null initialDirectory
+    final selectedDir = await FilePicker.platform.getDirectoryPath(
+      dialogTitle: 'Set root directory',
+      initialDirectory: rootDir,
+    );
+    // If they pick something, save it in prefs
+    if (selectedDir != null) {
+      await _prefs.setString(rootDirPrefKey, selectedDir);
+      rootDir = selectedDir;
+    }
+    // Otherwise stay as we are
+    return rootDir;
   }
 
   @override
@@ -63,15 +70,7 @@ class _MyHomePageState extends State<MyHomePage> {
         actions: <Widget>[
           IconButton(
             onPressed: () async {
-              _rootDir ??= await _prefs.getString(rootDirPrefKey);
-              final selectedDir = await FilePicker.platform.getDirectoryPath(
-                dialogTitle: 'Set root directory',
-                initialDirectory: _rootDir,
-              );
-              if (selectedDir != null) {
-                await _prefs.setString(rootDirPrefKey, selectedDir);
-                _rootDir = selectedDir;
-              }
+              _rootDir = await getRootDir(_rootDir);
             },
             icon: const Icon(Icons.settings),
             tooltip: 'Set root directory',
@@ -79,23 +78,36 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
       body: Center(
-        child: Column(
+        child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
+            const SizedBox(height: 16),
+            Text('Day', style: Theme.of(context).textTheme.headlineMedium),
+            FutureBuilder<int?>(
+                future: _prefs.getInt(dayNumPrefKey),
+                builder: (
+                  BuildContext context,
+                  AsyncSnapshot<int?> snapshot,
+                ) {
+                  if (snapshot.hasData) {
+                    _dayNum = snapshot.data ?? minDay;
+                    return NumberPicker(
+                      value: _dayNum,
+                      minValue: minDay,
+                      maxValue: maxDay,
+                      step: 1,
+                      haptics: true,
+                      onChanged: (value) async {
+                        setState(() => _dayNum = value);
+                        await _prefs.setInt(dayNumPrefKey, value);
+                      },
+                    );
+                  } else {
+                    return const CircularProgressIndicator();
+                  }
+                }),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
       ),
     );
   }
