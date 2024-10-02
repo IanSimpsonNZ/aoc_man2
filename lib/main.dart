@@ -1,5 +1,6 @@
 import 'package:aoc_manager/services/prefs_service.dart';
 import 'package:aoc_manager/utilities/dialogs/clear_prefs_dialog.dart';
+import 'package:extended_text/extended_text.dart';
 import 'package:flutter/material.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -78,38 +79,6 @@ class _MyHomePageState extends State<MyHomePage> {
     return newDir;
   }
 
-  // Future<void> getRootDir() async {
-  //   print('${await _prefs.getAll()}');
-  //   // If root hasn't been set, get the one from prefs (which might also be null)
-  //   _rootDir ??= await _prefs.getString(rootDirPrefKey);
-  //   // getDirectoryPath will take a null initialDirectory
-  //   final selectedDir = await FilePicker.platform.getDirectoryPath(
-  //     dialogTitle: 'Set root directory',
-  //     initialDirectory: _rootDir,
-  //   );
-  //   // If they pick something, save it in prefs
-  //   if (selectedDir != null) {
-  //     await _prefs.setString(rootDirPrefKey, selectedDir);
-  //     _rootDir = selectedDir;
-  //   }
-  //   // Otherwise stay as we are
-  // }
-
-  // Future<void> getDayDir() async {
-  //   final dirKey = '${appNamePrefKey}_${_dayNum}_dir';
-  //   _dataDir ??= await _prefs.getString(dirKey);
-  //   // getDirectoryPath will take a null initialDirectory
-  //   final selectedDir = await FilePicker.platform.getDirectoryPath(
-  //     dialogTitle: 'Set data directory',
-  //     initialDirectory: _rootDir,
-  //   );
-  //   // If they pick something, save it in prefs
-  //   if (selectedDir != null) {
-  //     await _prefs.setString(dirKey, selectedDir);
-  //     _dataDir = selectedDir;
-  //   }
-  // }
-
   Future<String?> getUniversalPrefs() async {
     _dayNum ??= await _prefs
         .getInt(dayNumPrefKey); // init always ensures this has a value
@@ -149,56 +118,16 @@ class _MyHomePageState extends State<MyHomePage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
-                      // const SizedBox(
-                      //   height: 16,
-                      //   //width: 32,
-                      // ),
                       Text('Day',
                           style: Theme.of(context).textTheme.headlineSmall),
                       _daySelector(),
                       _partSelector(),
                     ],
                   ),
-                  Wrap(
-                    spacing: 25,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: <Widget>[
-                      Text('Data Directory: ',
-                          style: Theme.of(context).textTheme.bodyLarge),
-                      FutureBuilder<String?>(
-                        future: _prefs.getString(_dayDirKey()),
-                        builder: (
-                          BuildContext context,
-                          AsyncSnapshot<String?> snapshot,
-                        ) {
-                          // print('_rootDir is ${_rootDir}');
-                          if (snapshot.hasData) {
-                            _dataDir = snapshot.data;
-                            return Text(_dataDir ?? (_rootDir ?? 'Empty'),
-                                style: Theme.of(context).textTheme.bodyLarge);
-                          }
-                          return Text(_rootDir ?? 'None',
-                              style: Theme.of(context).textTheme.bodyLarge);
-                        },
-                      ),
-                      IconButton(
-                        onPressed: () async {
-                          _dataDir = await _getDir(
-                            currentDir: _dataDir,
-                            key: _dayDirKey(),
-                            title: 'Set data directory',
-                          );
-                          setState(() {});
-                        },
-                        icon: const Icon(Icons.folder),
-                      ),
-                    ],
-                  ),
+                  _directorySelector(),
+                  _fileSelector(),
                 ],
               );
-              // } else {
-              //   return const CircularProgressIndicator();
-              // }
             }),
       ),
     );
@@ -243,11 +172,14 @@ class _MyHomePageState extends State<MyHomePage> {
       maxValue: maxDay,
       step: 1,
       haptics: true,
+      textStyle: Theme.of(context).textTheme.bodyMedium,
+      selectedTextStyle: Theme.of(context).textTheme.headlineSmall,
+      itemHeight: 30.0,
+      itemWidth: 50.0,
       onChanged: (value) async {
         setState(() => _dayNum = value);
         await _prefs.setInt(dayNumPrefKey, value);
         await getDayPrefs();
-        // if (_rootDir == null) await _prefs.getString(rootDirPrefKey);
       },
     );
   }
@@ -266,15 +198,14 @@ class _MyHomePageState extends State<MyHomePage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // SizedBox(
-                  //   height: 16,
-                  //   width: 16,
-                  // ),
                   RadioListTile<int>(
-                      // tileColor: Colors.green,
-                      title: const Text('Part 1'),
+                      title: Text(
+                        'Part 1',
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
                       value: 1,
                       groupValue: _partNum,
+                      dense: true,
                       onChanged: (int? value) {
                         setState(
                           () async {
@@ -284,10 +215,13 @@ class _MyHomePageState extends State<MyHomePage> {
                         );
                       }),
                   RadioListTile<int>(
-                      // tileColor: Colors.green,
-                      title: const Text('Part 2'),
+                      title: Text(
+                        'Part 2',
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
                       value: 2,
                       groupValue: _partNum,
+                      dense: true,
                       onChanged: (int? value) {
                         setState(
                           () {
@@ -305,5 +239,83 @@ class _MyHomePageState extends State<MyHomePage> {
             ]);
           }
         });
+  }
+
+  Widget _directorySelector() {
+    return Wrap(
+      spacing: 5,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: <Widget>[
+        SizedBox(
+          width: 120,
+          child: Text(
+            'Data Directory: ',
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+        ),
+        SizedBox(
+          width: 250,
+          child: FutureBuilder<String?>(
+            future: _prefs.getString(_dayDirKey()),
+            builder: (
+              BuildContext context,
+              AsyncSnapshot<String?> snapshot,
+            ) {
+              final String dirTxt;
+              if (snapshot.hasData) {
+                _dataDir = snapshot.data;
+                dirTxt = _dataDir ?? (_rootDir ?? 'Empty');
+              } else {
+                dirTxt = _rootDir ?? 'None';
+              }
+              return ExtendedText(
+                dirTxt,
+                style: Theme.of(context).textTheme.bodyLarge,
+                maxLines: 1,
+                overflowWidget: const TextOverflowWidget(
+                  position: TextOverflowPosition.start,
+                  child: Text('...'),
+                ),
+              );
+            },
+          ),
+        ),
+        SizedBox(
+          width: 30,
+          child: IconButton(
+            onPressed: () async {
+              _dataDir = await _getDir(
+                currentDir: _dataDir,
+                key: _dayDirKey(),
+                title: 'Set data directory',
+              );
+              setState(() {});
+            },
+            icon: const Icon(Icons.folder),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _fileSelector() {
+    return Wrap(
+        spacing: 5,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: <Widget>[
+          SizedBox(
+            width: 120,
+            child: Text('Data File: ',
+                style: Theme.of(context).textTheme.bodyLarge),
+          ),
+          SizedBox(
+            width: 250,
+            child:
+                Text('FileName ', style: Theme.of(context).textTheme.bodyLarge),
+          ),
+          const SizedBox(
+            width: 30,
+          )
+        ]);
   }
 }

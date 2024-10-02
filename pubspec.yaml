@@ -40,6 +40,7 @@ dependencies:
   file_picker: ^8.1.2
   shared_preferences: ^2.3.2
   numberpicker: ^2.1.2
+  extended_text: ^14.1.0
 
 dev_dependencies:
   flutter_test:
