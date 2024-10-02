@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:aoc_manager/services/prefs_service.dart';
 import 'package:aoc_manager/utilities/dialogs/clear_prefs_dialog.dart';
 import 'package:extended_text/extended_text.dart';
@@ -54,6 +56,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int? _dayNum;
   int _partNum = 1;
   String? _dataDir;
+  List<File> _dataFiles = [];
 
   String _dayPartKey() => '${appNamePrefKey}_${_dayNum}_part';
   String _dayDirKey() => '${appNamePrefKey}_${_dayNum}_dir';
@@ -85,9 +88,16 @@ class _MyHomePageState extends State<MyHomePage> {
     return _prefs.getString(rootDirPrefKey);
   }
 
-  Future<void> getDayPrefs() async {
+  Future<void> _getDayPrefs1() async {
     _partNum = await _prefs.getInt(_dayPartKey()) ?? 1;
     _dataDir = await _prefs.getString(_dayDirKey());
+    _dataFiles = _fileList();
+  }
+
+  Future<void> _getDayPrefs() async {
+    await _getDayPrefs1().whenComplete(() {
+      _dataFiles = _fileList();
+    });
   }
 
   @override
@@ -174,12 +184,13 @@ class _MyHomePageState extends State<MyHomePage> {
       haptics: true,
       textStyle: Theme.of(context).textTheme.bodyMedium,
       selectedTextStyle: Theme.of(context).textTheme.headlineSmall,
-      itemHeight: 30.0,
+      itemHeight: 40.0,
       itemWidth: 50.0,
       onChanged: (value) async {
-        setState(() => _dayNum = value);
+        _dayNum = value;
         await _prefs.setInt(dayNumPrefKey, value);
-        await getDayPrefs();
+        await _getDayPrefs();
+        setState(() {});
       },
     );
   }
@@ -310,12 +321,28 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           SizedBox(
             width: 250,
-            child:
-                Text('FileName ', style: Theme.of(context).textTheme.bodyLarge),
+            child: Text(_dataFiles.toString(),
+                style: Theme.of(context).textTheme.bodyLarge),
           ),
           const SizedBox(
             width: 30,
           )
         ]);
+  }
+
+  List<File> _fileList() {
+    final List<File> files;
+    if (_dataDir != null) {
+      // print('Getting directory');
+      files = Directory(_dataDir!)
+          .listSync()
+          .whereType<File>()
+          // .map((f) => f.toString())
+          .where((s) => s.toString().contains('.txt'))
+          .toList();
+    } else {
+      files = [];
+    }
+    return files;
   }
 }
