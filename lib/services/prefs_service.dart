@@ -10,8 +10,8 @@ Future<void> initPrefs() async {
     await prefs.setInt(dayNumPrefKey, minDay);
   }
   for (var day = minDay; day <= maxDay; day++) {
-    final key = '${appNamePrefKey}_${day}_part';
-    final currentPart = await prefs.getInt(key);
-    if (currentPart == null) prefs.setInt(key, 1);
+    final partKey = '${appNamePrefKey}_${day}_part';
+    final currentPart = await prefs.getInt(partKey);
+    if (currentPart == null) prefs.setInt(partKey, 1);
   }
 }

@@ -50,26 +50,75 @@ class _MyHomePageState extends State<MyHomePage> {
   final _prefs = SharedPreferencesAsync();
 
   String? _rootDir;
-  int _dayNum = minDay;
+  int? _dayNum;
   int _partNum = 1;
+  String? _dataDir;
 
   String _dayPartKey() => '${appNamePrefKey}_${_dayNum}_part';
+  String _dayDirKey() => '${appNamePrefKey}_${_dayNum}_dir';
 
-  Future<void> getRootDir() async {
+  Future<String?> _getDir({
+    required String? currentDir,
+    required String key,
+    required String title,
+  }) async {
     print('${await _prefs.getAll()}');
-    // If root hasn't been set, get the one from prefs (which might also be null)
-    _rootDir ??= await _prefs.getString(rootDirPrefKey);
+    // If Dir hasn't been set, try and get value from prefs
+    String? newDir = currentDir ?? await _prefs.getString(key);
     // getDirectoryPath will take a null initialDirectory
     final selectedDir = await FilePicker.platform.getDirectoryPath(
-      dialogTitle: 'Set root directory',
-      initialDirectory: _rootDir,
+      dialogTitle: title,
+      initialDirectory: newDir,
     );
     // If they pick something, save it in prefs
     if (selectedDir != null) {
-      await _prefs.setString(rootDirPrefKey, selectedDir);
-      _rootDir = selectedDir;
+      await _prefs.setString(key, selectedDir);
+      newDir = selectedDir;
     }
-    // Otherwise stay as we are
+    return newDir;
+  }
+
+  // Future<void> getRootDir() async {
+  //   print('${await _prefs.getAll()}');
+  //   // If root hasn't been set, get the one from prefs (which might also be null)
+  //   _rootDir ??= await _prefs.getString(rootDirPrefKey);
+  //   // getDirectoryPath will take a null initialDirectory
+  //   final selectedDir = await FilePicker.platform.getDirectoryPath(
+  //     dialogTitle: 'Set root directory',
+  //     initialDirectory: _rootDir,
+  //   );
+  //   // If they pick something, save it in prefs
+  //   if (selectedDir != null) {
+  //     await _prefs.setString(rootDirPrefKey, selectedDir);
+  //     _rootDir = selectedDir;
+  //   }
+  //   // Otherwise stay as we are
+  // }
+
+  // Future<void> getDayDir() async {
+  //   final dirKey = '${appNamePrefKey}_${_dayNum}_dir';
+  //   _dataDir ??= await _prefs.getString(dirKey);
+  //   // getDirectoryPath will take a null initialDirectory
+  //   final selectedDir = await FilePicker.platform.getDirectoryPath(
+  //     dialogTitle: 'Set data directory',
+  //     initialDirectory: _rootDir,
+  //   );
+  //   // If they pick something, save it in prefs
+  //   if (selectedDir != null) {
+  //     await _prefs.setString(dirKey, selectedDir);
+  //     _dataDir = selectedDir;
+  //   }
+  // }
+
+  Future<String?> getUniversalPrefs() async {
+    _dayNum ??= await _prefs
+        .getInt(dayNumPrefKey); // init always ensures this has a value
+    return _prefs.getString(rootDirPrefKey);
+  }
+
+  Future<void> getDayPrefs() async {
+    _partNum = await _prefs.getInt(_dayPartKey()) ?? 1;
+    _dataDir = await _prefs.getString(_dayDirKey());
   }
 
   @override
@@ -81,19 +130,76 @@ class _MyHomePageState extends State<MyHomePage> {
         actions: <Widget>[_settingsMenu()],
       ),
       body: Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            const SizedBox(
-              height: 16,
-              //width: 32,
-            ),
-            Text('Day', style: Theme.of(context).textTheme.headlineSmall),
-            _daySelector(),
-            _partSelector(),
-          ],
-        ),
+        child: FutureBuilder<String?>(
+            future: getUniversalPrefs(),
+            builder: (
+              BuildContext context,
+              AsyncSnapshot snapshot,
+            ) {
+              if (snapshot.hasData) {
+                _rootDir = snapshot.data;
+              } else {
+                _rootDir = null;
+              }
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      // const SizedBox(
+                      //   height: 16,
+                      //   //width: 32,
+                      // ),
+                      Text('Day',
+                          style: Theme.of(context).textTheme.headlineSmall),
+                      _daySelector(),
+                      _partSelector(),
+                    ],
+                  ),
+                  Wrap(
+                    spacing: 25,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: <Widget>[
+                      Text('Data Directory: ',
+                          style: Theme.of(context).textTheme.bodyLarge),
+                      FutureBuilder<String?>(
+                        future: _prefs.getString(_dayDirKey()),
+                        builder: (
+                          BuildContext context,
+                          AsyncSnapshot<String?> snapshot,
+                        ) {
+                          // print('_rootDir is ${_rootDir}');
+                          if (snapshot.hasData) {
+                            _dataDir = snapshot.data;
+                            return Text(_dataDir ?? (_rootDir ?? 'Empty'),
+                                style: Theme.of(context).textTheme.bodyLarge);
+                          }
+                          return Text(_rootDir ?? 'None',
+                              style: Theme.of(context).textTheme.bodyLarge);
+                        },
+                      ),
+                      IconButton(
+                        onPressed: () async {
+                          _dataDir = await _getDir(
+                            currentDir: _dataDir,
+                            key: _dayDirKey(),
+                            title: 'Set data directory',
+                          );
+                          setState(() {});
+                        },
+                        icon: const Icon(Icons.folder),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+              // } else {
+              //   return const CircularProgressIndicator();
+              // }
+            }),
       ),
     );
   }
@@ -103,7 +209,11 @@ class _MyHomePageState extends State<MyHomePage> {
       onSelected: (value) async {
         switch (value) {
           case HomeMenuAction.setRoot:
-            await getRootDir();
+            _rootDir = await _getDir(
+              currentDir: _rootDir,
+              key: rootDirPrefKey,
+              title: 'Set root directory',
+            );
           case HomeMenuAction.clearPrefs:
             final shouldClear = await showClearPrefsDialog(context);
             if (shouldClear) await _prefs.clear();
@@ -127,29 +237,19 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget _daySelector() {
-    return FutureBuilder<int?>(
-        future: _prefs.getInt(dayNumPrefKey),
-        builder: (
-          BuildContext context,
-          AsyncSnapshot<int?> snapshot,
-        ) {
-          if (snapshot.hasData) {
-            _dayNum = snapshot.data ?? minDay;
-            return NumberPicker(
-              value: _dayNum,
-              minValue: minDay,
-              maxValue: maxDay,
-              step: 1,
-              haptics: true,
-              onChanged: (value) async {
-                setState(() => _dayNum = value);
-                await _prefs.setInt(dayNumPrefKey, value);
-              },
-            );
-          } else {
-            return const CircularProgressIndicator();
-          }
-        });
+    return NumberPicker(
+      value: _dayNum ?? minDay,
+      minValue: minDay,
+      maxValue: maxDay,
+      step: 1,
+      haptics: true,
+      onChanged: (value) async {
+        setState(() => _dayNum = value);
+        await _prefs.setInt(dayNumPrefKey, value);
+        await getDayPrefs();
+        // if (_rootDir == null) await _prefs.getString(rootDirPrefKey);
+      },
+    );
   }
 
   Widget _partSelector() {
@@ -201,7 +301,7 @@ class _MyHomePageState extends State<MyHomePage> {
             );
           } else {
             return const Column(children: [
-              const CircularProgressIndicator(),
+              CircularProgressIndicator(),
             ]);
           }
         });
