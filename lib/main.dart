@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:aoc_manager/services/prefs_service.dart';
 import 'package:aoc_manager/utilities/dialogs/clear_prefs_dialog.dart';
 import 'package:extended_text/extended_text.dart';
@@ -53,13 +51,14 @@ class _MyHomePageState extends State<MyHomePage> {
   final _prefs = SharedPreferencesAsync();
 
   String? _rootDir;
-  int? _dayNum;
-  int _partNum = 1;
-  String? _dataDir;
-  List<File> _dataFiles = [];
+  // int? _dayNum;
+  // int _partNum = 1;
+  // String? _dataDir;
+  // List<File> _dataFiles = [];
 
-  String _dayPartKey() => '${appNamePrefKey}_${_dayNum}_part';
-  String _dayDirKey() => '${appNamePrefKey}_${_dayNum}_dir';
+  String _dayPartKey(dayNum) => '${appNamePrefKey}_${dayNum}_part';
+  String _dayDirKey(dayNum) => '${appNamePrefKey}_${dayNum}_dir';
+  String _dayFileKey(dayNum) => '${appNamePrefKey}_${dayNum}_file';
 
   Future<String?> _getDir({
     required String? currentDir,
@@ -83,22 +82,22 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<String?> getUniversalPrefs() async {
-    _dayNum ??= await _prefs
-        .getInt(dayNumPrefKey); // init always ensures this has a value
+    // _dayNum ??= await _prefs
+    //     .getInt(dayNumPrefKey); // init always ensures this has a value
     return _prefs.getString(rootDirPrefKey);
   }
 
-  Future<void> _getDayPrefs1() async {
-    _partNum = await _prefs.getInt(_dayPartKey()) ?? 1;
-    _dataDir = await _prefs.getString(_dayDirKey());
-    _dataFiles = _fileList();
-  }
+  // Future<void> _getDayPrefs1() async {
+  //   _partNum = await _prefs.getInt(_dayPartKey()) ?? 1;
+  //   _dataDir = await _prefs.getString(_dayDirKey());
+  //   _dataFiles = _fileList();
+  // }
 
-  Future<void> _getDayPrefs() async {
-    await _getDayPrefs1().whenComplete(() {
-      _dataFiles = _fileList();
-    });
-  }
+  // Future<void> _getDayPrefs() async {
+  //   await _getDayPrefs1().whenComplete(() {
+  //     _dataFiles = _fileList();
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +109,8 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Center(
         child: FutureBuilder<String?>(
-            future: getUniversalPrefs(),
+            //future: getUniversalPrefs(),
+            future: _prefs.getString(rootDirPrefKey),
             builder: (
               BuildContext context,
               AsyncSnapshot snapshot,
@@ -176,34 +176,50 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget _daySelector() {
-    return NumberPicker(
-      value: _dayNum ?? minDay,
-      minValue: minDay,
-      maxValue: maxDay,
-      step: 1,
-      haptics: true,
-      textStyle: Theme.of(context).textTheme.bodyMedium,
-      selectedTextStyle: Theme.of(context).textTheme.headlineSmall,
-      itemHeight: 40.0,
-      itemWidth: 50.0,
-      onChanged: (value) async {
-        _dayNum = value;
-        await _prefs.setInt(dayNumPrefKey, value);
-        await _getDayPrefs();
-        setState(() {});
-      },
-    );
+    return FutureBuilder<int?>(
+        future: _prefs.getInt(dayNumPrefKey),
+        builder: (
+          BuildContext context,
+          AsyncSnapshot snapshot,
+        ) {
+          if (snapshot.hasData) {
+            return NumberPicker(
+              value: snapshot.data ?? minDay,
+              minValue: minDay,
+              maxValue: maxDay,
+              step: 1,
+              haptics: true,
+              textStyle: Theme.of(context).textTheme.bodyMedium,
+              selectedTextStyle: Theme.of(context).textTheme.headlineSmall,
+              itemHeight: 50.0,
+              itemWidth: 50.0,
+              onChanged: (value) async {
+                // _dayNum = value;
+                await _prefs.setInt(dayNumPrefKey, value);
+                // await _getDayPrefs();
+                setState(() {});
+              },
+            );
+          } else {
+            return const CircularProgressIndicator();
+          }
+        });
+  }
+
+  Future<int?> _getPartNum() async {
+    final dayNum = await _prefs.getInt(dayNumPrefKey);
+    return _prefs.getInt(_dayPartKey(dayNum));
   }
 
   Widget _partSelector() {
     return FutureBuilder<int?>(
-        future: _prefs.getInt(_dayPartKey()),
+        future: _getPartNum(),
         builder: (
           BuildContext context,
           AsyncSnapshot<int?> snapshot,
         ) {
           if (snapshot.hasData) {
-            _partNum = snapshot.data ?? 1;
+            // _partNum = snapshot.data ?? 1;
             return IntrinsicWidth(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -215,15 +231,15 @@ class _MyHomePageState extends State<MyHomePage> {
                         style: Theme.of(context).textTheme.bodyLarge,
                       ),
                       value: 1,
-                      groupValue: _partNum,
+                      groupValue: snapshot.data ?? 1,
                       dense: true,
-                      onChanged: (int? value) {
-                        setState(
-                          () async {
-                            _partNum = value ?? 1;
-                            _prefs.setInt(_dayPartKey(), _partNum);
-                          },
+                      onChanged: (int? value) async {
+                        // _partNum = value ?? 1;
+                        await _prefs.setInt(
+                          _dayPartKey(await _prefs.getInt(dayNumPrefKey)),
+                          value ?? 1,
                         );
+                        setState(() {});
                       }),
                   RadioListTile<int>(
                       title: Text(
@@ -231,15 +247,15 @@ class _MyHomePageState extends State<MyHomePage> {
                         style: Theme.of(context).textTheme.bodyLarge,
                       ),
                       value: 2,
-                      groupValue: _partNum,
+                      groupValue: snapshot.data ?? 1, //_partNum,
                       dense: true,
-                      onChanged: (int? value) {
-                        setState(
-                          () {
-                            _partNum = value ?? 1;
-                            _prefs.setInt(_dayPartKey(), _partNum);
-                          },
+                      onChanged: (int? value) async {
+                        //_partNum = value ?? 1;
+                        await _prefs.setInt(
+                          _dayPartKey(await _prefs.getInt(dayNumPrefKey)),
+                          value ?? 1,
                         );
+                        setState(() {});
                       }),
                 ],
               ),
@@ -250,6 +266,11 @@ class _MyHomePageState extends State<MyHomePage> {
             ]);
           }
         });
+  }
+
+  Future<String?> _getDataDir() async {
+    final dayNum = await _prefs.getInt(dayNumPrefKey);
+    return _prefs.getString(_dayDirKey(dayNum));
   }
 
   Widget _directorySelector() {
@@ -267,15 +288,15 @@ class _MyHomePageState extends State<MyHomePage> {
         SizedBox(
           width: 250,
           child: FutureBuilder<String?>(
-            future: _prefs.getString(_dayDirKey()),
+            future: _getDataDir(),
             builder: (
               BuildContext context,
               AsyncSnapshot<String?> snapshot,
             ) {
               final String dirTxt;
               if (snapshot.hasData) {
-                _dataDir = snapshot.data;
-                dirTxt = _dataDir ?? (_rootDir ?? 'Empty');
+                // _dataDir = snapshot.data;
+                dirTxt = snapshot.data ?? (_rootDir ?? 'Empty');
               } else {
                 dirTxt = _rootDir ?? 'None';
               }
@@ -295,11 +316,19 @@ class _MyHomePageState extends State<MyHomePage> {
           width: 30,
           child: IconButton(
             onPressed: () async {
-              _dataDir = await _getDir(
-                currentDir: _dataDir,
-                key: _dayDirKey(),
+              final dayNum = await _prefs.getInt(dayNumPrefKey);
+              final dayDirKey = _dayDirKey(dayNum);
+              final currentDir =
+                  (await _prefs.getString(dayDirKey)) ?? _rootDir;
+              final newDir = await _getDir(
+                currentDir: currentDir,
+                key: dayDirKey,
                 title: 'Set data directory',
               );
+              if (newDir != null && newDir != currentDir) {
+                final dayFileKey = _dayFileKey(dayNum);
+                await _prefs.remove(dayFileKey);
+              }
               setState(() {});
             },
             icon: const Icon(Icons.folder),
@@ -307,6 +336,11 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ],
     );
+  }
+
+  Future<String?> _getDataFile() async {
+    final dayNum = await _prefs.getInt(dayNumPrefKey);
+    return _prefs.getString(_dayFileKey(dayNum));
   }
 
   Widget _fileSelector() {
@@ -321,28 +355,78 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           SizedBox(
             width: 250,
-            child: Text(_dataFiles.toString(),
-                style: Theme.of(context).textTheme.bodyLarge),
+            child: FutureBuilder<String?>(
+              future: _getDataFile(),
+              builder: (
+                BuildContext context,
+                AsyncSnapshot<String?> snapshot,
+              ) {
+                final String fileTxt;
+                if (snapshot.hasData) {
+                  // _dataDir = snapshot.data;
+                  fileTxt = snapshot.data ?? '';
+                } else {
+                  fileTxt = '';
+                }
+                return Text(
+                  fileTxt,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                );
+              },
+            ),
           ),
-          const SizedBox(
+          SizedBox(
             width: 30,
+            child: IconButton(
+              onPressed: () async {
+                final dayNum = await _prefs.getInt(dayNumPrefKey);
+                final dirKey = _dayDirKey(dayNum);
+                final currentDir = (await _prefs.getString(dirKey)) ?? _rootDir;
+                final file = await FilePicker.platform.pickFiles(
+                  dialogTitle: 'Select data file',
+                  initialDirectory: currentDir,
+                  allowMultiple: false,
+                  type: FileType.custom,
+                  allowedExtensions: ['txt'],
+                );
+                if (file != null) {
+                  if (file.count == 1) {
+                    final dayFileKey = _dayFileKey(dayNum);
+                    final fileName = file.names.first;
+                    final pathName =
+                        file.paths.first?.replaceAll('\\$fileName', '');
+                    if (fileName != null) {
+                      await _prefs.setString(dayFileKey, fileName);
+                      await _prefs.setString(dirKey, pathName!);
+                    }
+                  }
+                }
+                // await _getDir(
+                //   currentDir: currentDir,
+                //   key: dayDirKey,
+                //   title: 'Set data directory',
+                // );
+                setState(() {});
+              },
+              icon: const Icon(Icons.file_open),
+            ),
           )
         ]);
   }
 
-  List<File> _fileList() {
-    final List<File> files;
-    if (_dataDir != null) {
-      // print('Getting directory');
-      files = Directory(_dataDir!)
-          .listSync()
-          .whereType<File>()
-          // .map((f) => f.toString())
-          .where((s) => s.toString().contains('.txt'))
-          .toList();
-    } else {
-      files = [];
-    }
-    return files;
-  }
+  // List<File> _fileList() {
+  //   final List<File> files;
+  //   if (_dataDir != null) {
+  //     // print('Getting directory');
+  //     files = Directory(_dataDir!)
+  //         .listSync()
+  //         .whereType<File>()
+  //         // .map((f) => f.toString())
+  //         .where((s) => s.toString().contains('.txt'))
+  //         .toList();
+  //   } else {
+  //     files = [];
+  //   }
+  //   return files;
+  // }
 }
