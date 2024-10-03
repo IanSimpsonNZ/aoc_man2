@@ -15,3 +15,12 @@ Future<void> initPrefs() async {
     if (currentPart == null) prefs.setInt(partKey, 1);
   }
 }
+
+
+// Would this be better as ...
+// class MyPreferences extends SharedPreferencesAsync {
+// make it a singleton
+// don't need - just use "this." (?) final prefs = SharedPreferencesAsync();
+// Future<void> initPrefs() async {...}
+// all the little helper functions and constants
+//}
