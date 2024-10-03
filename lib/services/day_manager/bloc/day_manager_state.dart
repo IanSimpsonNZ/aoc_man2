@@ -28,23 +28,3 @@ class DayReady extends DayState {
     required this.rootDir,
   });
 }
-
-// class DayUpdateDayPanel extends DayState {
-//   final int dayNum;
-//   final int partNum;
-
-//   const DayUpdateDayPanel({
-//     required this.dayNum,
-//     required this.partNum,
-//   });
-// }
-
-// class DayUpdateFilePanel extends DayState {
-//   final String dirName;
-//   final String fileName;
-
-//   const DayUpdateFilePanel({
-//     required this.dirName,
-//     required this.fileName,
-//   });
-// }
