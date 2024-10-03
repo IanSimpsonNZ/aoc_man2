@@ -18,12 +18,14 @@ class DayReady extends DayState {
   final int partNum;
   final String dirName;
   final String fileName;
+  final String rootDir;
 
   const DayReady({
     required this.dayNum,
     required this.partNum,
     required this.dirName,
     required this.fileName,
+    required this.rootDir,
   });
 }
 

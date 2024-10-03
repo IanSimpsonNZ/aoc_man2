@@ -4,6 +4,7 @@ import 'package:aoc_manager/services/day_manager/bloc/day_manager_event.dart';
 import 'package:aoc_manager/services/day_manager/bloc/day_manager_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:developer' as devtools show log;
 
 class DayBloc extends Bloc<DayEvent, DayState> {
   final _prefs = SharedPreferencesAsync();
@@ -34,6 +35,7 @@ class DayBloc extends Bloc<DayEvent, DayState> {
         partNum: _partNum,
         dirName: _dirName ?? (_rootDir ?? ''),
         fileName: _fileName ?? '',
+        rootDir: _rootDir ?? '',
       );
 
   Future<void> initPrefs() async {
@@ -134,6 +136,7 @@ class DayBloc extends Bloc<DayEvent, DayState> {
     // Change root dir
     on<DayChangeRootDirEvent>(
       (event, emit) async {
+        devtools.log((await _prefs.getAll()).toString());
         if (event.newRootDir != null) {
           _rootDir = event.newRootDir;
           await _prefs.setString(rootDirPrefKey, event.newRootDir!);
