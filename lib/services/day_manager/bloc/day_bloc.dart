@@ -3,6 +3,7 @@ import 'package:aoc_manager/constants/pref_constants.dart';
 import 'package:aoc_manager/services/day_manager/bloc/day_manager_event.dart';
 import 'package:aoc_manager/services/day_manager/bloc/day_manager_state.dart';
 import 'package:aoc_manager/services/day_manager/day_manager_exceptions.dart';
+import 'package:aoc_manager/solutions/day01_part1.dart';
 import 'package:aoc_manager/solutions/generic_solution.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,7 +23,7 @@ class DayBloc extends Bloc<DayEvent, DayState> {
   final List<String> _messages = [];
 
   final _solutions = [
-    [Solution(), Solution()], // 1
+    [Day01P1(), Solution()], // 1
     [Solution(), Solution()], // 2
     [Solution(), Solution()], // 3
     [Solution(), Solution()], // 4
@@ -209,10 +210,12 @@ class DayBloc extends Bloc<DayEvent, DayState> {
         if (!_isRunning) {
           if (_fileName != null && _fileName != '') {
             _isRunning = true;
+            final file = join(_dirName!, _fileName!);
             _messages.add('Running solution for day $_dayNum, part $_partNum');
+            _messages.add('Using : $file');
             emit(_newDayData());
-            _solutions[_dayNum - 1][_partNum - 1]
-                .run(join(_dirName!, _fileName!), event.dayEventHandler);
+            final solution = _solutions[_dayNum - 1][_partNum - 1];
+            solution.run(file, event.dayEventHandler);
             _isRunning = false;
             emit(_newDayData());
           } else {
