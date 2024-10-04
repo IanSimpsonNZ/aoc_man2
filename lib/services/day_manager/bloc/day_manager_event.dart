@@ -1,3 +1,4 @@
+import 'package:aoc_manager/services/day_manager/bloc/day_bloc.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 
@@ -41,7 +42,8 @@ class DayClearPrefsEvent extends DayEvent {
 }
 
 class DayRunEvent extends DayEvent {
-  const DayRunEvent();
+  final DayBloc dayEventHandler;
+  const DayRunEvent(this.dayEventHandler);
 }
 
 class DayPauseEvent extends DayEvent {
@@ -50,4 +52,10 @@ class DayPauseEvent extends DayEvent {
 
 class DayHaltEvent extends DayEvent {
   const DayHaltEvent();
+}
+
+class DaySendMessage extends DayEvent {
+  final String message;
+
+  const DaySendMessage({required this.message});
 }

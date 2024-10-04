@@ -19,7 +19,8 @@ class ButtonPanel extends StatelessWidget {
               onPressed: state.isRunning
                   ? null
                   : () {
-                      context.read<DayBloc>().add(const DayRunEvent());
+                      final dayEventHandler = context.read<DayBloc>();
+                      dayEventHandler.add(DayRunEvent(dayEventHandler));
                     },
               child: const SizedBox(
                 width: 50,

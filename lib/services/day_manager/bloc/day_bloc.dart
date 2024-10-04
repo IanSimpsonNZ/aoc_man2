@@ -5,6 +5,7 @@ import 'package:aoc_manager/services/day_manager/bloc/day_manager_state.dart';
 import 'package:aoc_manager/solutions/generic_solution.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path/path.dart' show join;
 import 'dart:developer' as devtools show log;
 
 class DayBloc extends Bloc<DayEvent, DayState> {
@@ -19,7 +20,7 @@ class DayBloc extends Bloc<DayEvent, DayState> {
 
   final List<String> _messages = [];
 
-  final solutions = [
+  final _solutions = [
     [Solution(), Solution()], // 1
     [Solution(), Solution()], // 2
     [Solution(), Solution()], // 3
@@ -58,7 +59,7 @@ class DayBloc extends Bloc<DayEvent, DayState> {
   String _dayDirKey() => '${appNamePrefKey}_${_dayNum}_dir';
   String _dayFileKey() => '${appNamePrefKey}_${_dayNum}_file';
 
-  Future<void> getPrefsForDay() async {
+  Future<void> _getPrefsForDay() async {
     _partNum = await _prefs.getInt(_dayPartKey()) ?? 1;
     _dirName = await _prefs.getString(_dayDirKey());
     _fileName = await _prefs.getString(_dayFileKey());
@@ -74,7 +75,7 @@ class DayBloc extends Bloc<DayEvent, DayState> {
         messages: _messages,
       );
 
-  Future<void> initPrefs() async {
+  Future<void> _initPrefs() async {
     final currentDay = await _prefs.getInt(dayNumPrefKey);
     if (currentDay == null) {
       await _prefs.setInt(dayNumPrefKey, minDay);
@@ -92,14 +93,14 @@ class DayBloc extends Bloc<DayEvent, DayState> {
     // Load initial prefs
     _rootDir = await _prefs.getString(rootDirPrefKey);
     // Already have _dayNum from above
-    await getPrefsForDay();
+    await _getPrefsForDay();
   }
 
   DayBloc() : super(const DayUninitialised()) {
     // Initiate - get previous settings, or create them if first run
     on<DayInitialiseEvent>((event, emit) async {
       emit(const DayWorking());
-      await initPrefs();
+      await _initPrefs();
       // Set up basic prefs if required
       emit(_newDayData());
     });
@@ -112,7 +113,7 @@ class DayBloc extends Bloc<DayEvent, DayState> {
           _dayNum = event.newDay;
           assert(_dayNum >= minDay && _dayNum <= maxDay);
           await _prefs.setInt(dayNumPrefKey, event.newDay);
-          await getPrefsForDay();
+          await _getPrefsForDay();
           emit(_newDayData());
         }
       },
@@ -193,9 +194,9 @@ class DayBloc extends Bloc<DayEvent, DayState> {
       (event, emit) async {
         emit(const DayWorking());
         await _prefs.clear();
-        await initPrefs(); // This sets _dayNum
+        await _initPrefs(); // This sets _dayNum
         _rootDir = await _prefs.getString(rootDirPrefKey);
-        await getPrefsForDay();
+        await _getPrefsForDay();
         emit(_newDayData());
       },
     );
@@ -208,10 +209,8 @@ class DayBloc extends Bloc<DayEvent, DayState> {
             _isRunning = true;
             _messages.add('Running solution for day $_dayNum, part $_partNum');
             emit(_newDayData());
-            for (int i = 0; i < 50; i++) {
-              _messages.add('Line number $i');
-              emit(_newDayData());
-            }
+            _solutions[_dayNum - 1][_partNum - 1]
+                .run(join(_dirName!, _fileName!), event.dayEventHandler);
           } else {
             devtools.log('Dialog saying no data selected');
           }
@@ -240,6 +239,14 @@ class DayBloc extends Bloc<DayEvent, DayState> {
           _isRunning = false;
           emit(_newDayData());
         }
+      },
+    );
+
+    // Messages to output panel
+    on<DaySendMessage>(
+      (event, emit) {
+        _messages.add(event.message);
+        emit(_newDayData());
       },
     );
   }
