@@ -147,6 +147,10 @@ class DayBloc extends Bloc<DayEvent, DayState> {
             // If it's a new drectory, clear the file selection
             if (event.newDir != _dirName) {
               await _prefs.remove(_dayFileKey());
+              final tmp = _partNum;
+              _partNum = (_partNum % 2) + 1;
+              await _prefs.remove(_dayFileKey());
+              _partNum = tmp;
               _fileName = null;
             }
             // and save the directory
