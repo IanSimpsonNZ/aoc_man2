@@ -1,0 +1,1 @@
+class DayNoFileSelectedException implements Exception {}

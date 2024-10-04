@@ -2,6 +2,7 @@ import 'package:aoc_manager/constants/day_constants.dart';
 import 'package:aoc_manager/constants/pref_constants.dart';
 import 'package:aoc_manager/services/day_manager/bloc/day_manager_event.dart';
 import 'package:aoc_manager/services/day_manager/bloc/day_manager_state.dart';
+import 'package:aoc_manager/services/day_manager/day_manager_exceptions.dart';
 import 'package:aoc_manager/solutions/generic_solution.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -65,7 +66,7 @@ class DayBloc extends Bloc<DayEvent, DayState> {
     _fileName = await _prefs.getString(_dayFileKey());
   }
 
-  DayReady _newDayData(/* {String? newMessage} */) => DayReady(
+  DayReady _newDayData({Exception? exception}) => DayReady(
         dayNum: _dayNum,
         partNum: _partNum,
         dirName: _dirName ?? (_rootDir ?? ''),
@@ -73,6 +74,7 @@ class DayBloc extends Bloc<DayEvent, DayState> {
         rootDir: _rootDir ?? '',
         isRunning: _isRunning,
         messages: _messages,
+        exception,
       );
 
   Future<void> _initPrefs() async {
@@ -211,8 +213,10 @@ class DayBloc extends Bloc<DayEvent, DayState> {
             emit(_newDayData());
             _solutions[_dayNum - 1][_partNum - 1]
                 .run(join(_dirName!, _fileName!), event.dayEventHandler);
+            _isRunning = false;
+            emit(_newDayData());
           } else {
-            devtools.log('Dialog saying no data selected');
+            emit(_newDayData(exception: DayNoFileSelectedException()));
           }
         }
       },
