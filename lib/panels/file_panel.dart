@@ -20,95 +20,106 @@ class _FilePanelState extends State<FilePanel> {
     return BlocBuilder<DayBloc, DayState>(
       builder: (context, state) {
         if (state is DayReady) {
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Wrap(
-                spacing: 5,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: <Widget>[
-                  SizedBox(
-                    width: 120,
-                    child: Text(
-                      'Data Directory: ',
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                  ),
-                  SizedBox(
-                    width: 250,
-                    child: ExtendedText(
-                      state.dirName,
-                      style: Theme.of(context).textTheme.bodyLarge,
-                      maxLines: 1,
-                      overflowWidget: const TextOverflowWidget(
-                        position: TextOverflowPosition.start,
-                        child: Text('...'),
+          return Opacity(
+            opacity: state.isRunning ? 0.5 : 1.0,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Wrap(
+                  spacing: 5,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: <Widget>[
+                    SizedBox(
+                      width: 120,
+                      child: Text(
+                        'Data Directory: ',
+                        style: Theme.of(context).textTheme.bodyLarge,
                       ),
                     ),
-                  ),
-                  SizedBox(
-                    width: 30,
-                    child: IconButton(
-                      onPressed: () async {
-                        final selectedDir =
-                            await FilePicker.platform.getDirectoryPath(
-                          dialogTitle: 'Set data directory',
-                          initialDirectory: state.dirName,
-                        );
-                        if (context.mounted) {
-                          context
-                              .read<DayBloc>()
-                              .add(DayChangeDirEvent(selectedDir));
-                        } else {
-                          devtools
-                              .log('context not moiunted for "Set Directory"');
-                        }
-                      },
-                      icon: const Icon(Icons.folder),
+                    SizedBox(
+                      width: 250,
+                      child: ExtendedText(
+                        state.dirName,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                        maxLines: 1,
+                        overflowWidget: const TextOverflowWidget(
+                          position: TextOverflowPosition.start,
+                          child: Text('...'),
+                        ),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              Wrap(
-                spacing: 5,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: <Widget>[
-                  SizedBox(
-                    width: 120,
-                    child: Text('Data File: ',
-                        style: Theme.of(context).textTheme.bodyLarge),
-                  ),
-                  SizedBox(
-                    width: 250,
-                    child: Text(
-                      state.fileName,
-                      style: Theme.of(context).textTheme.bodyLarge,
+                    SizedBox(
+                      width: 30,
+                      child: IconButton(
+                        onPressed: state.isRunning
+                            ? null
+                            : () async {
+                                final selectedDir =
+                                    await FilePicker.platform.getDirectoryPath(
+                                  dialogTitle: 'Set data directory',
+                                  initialDirectory: state.dirName,
+                                );
+                                if (context.mounted) {
+                                  context
+                                      .read<DayBloc>()
+                                      .add(DayChangeDirEvent(selectedDir));
+                                } else {
+                                  devtools.log(
+                                      'context not moiunted for "Set Directory"');
+                                }
+                              },
+                        icon: const Icon(Icons.folder),
+                      ),
                     ),
-                  ),
-                  SizedBox(
-                    width: 30,
-                    child: IconButton(
-                      onPressed: () async {
-                        final file = await FilePicker.platform.pickFiles(
-                          dialogTitle: 'Select data file',
-                          initialDirectory: state.dirName,
-                          allowMultiple: false,
-                          type: FileType.custom,
-                          allowedExtensions: ['txt'],
-                        );
-                        if (context.mounted) {
-                          context.read<DayBloc>().add(DayChangeFileEvent(file));
-                        } else {
-                          devtools.log('context not moiunted for "Set File"');
-                        }
-                      },
-                      icon: const Icon(Icons.file_open),
+                  ],
+                ),
+                Wrap(
+                  spacing: 5,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: <Widget>[
+                    SizedBox(
+                      width: 120,
+                      child: Text('Data File: ',
+                          style: Theme.of(context).textTheme.bodyLarge),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                    SizedBox(
+                      width: 250,
+                      child: Text(
+                        state.fileName,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                    ),
+                    SizedBox(
+                      width: 30,
+                      child: IconButton(
+                        onPressed: state.isRunning
+                            ? null
+                            : () async {
+                                final file =
+                                    await FilePicker.platform.pickFiles(
+                                  dialogTitle: 'Select data file',
+                                  initialDirectory: state.dirName,
+                                  allowMultiple: false,
+                                  type: FileType.custom,
+                                  allowedExtensions: ['txt'],
+                                );
+                                if (context.mounted) {
+                                  context
+                                      .read<DayBloc>()
+                                      .add(DayChangeFileEvent(file));
+                                } else {
+                                  devtools.log(
+                                      'context not moiunted for "Set File"');
+                                }
+                              },
+                        icon: const Icon(Icons.file_open),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           );
         } else {
           return const Scaffold(

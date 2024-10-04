@@ -16,7 +16,11 @@ class ButtonPanel extends StatelessWidget {
           crossAxisAlignment: WrapCrossAlignment.center,
           children: <Widget>[
             ElevatedButton(
-              onPressed: () {},
+              onPressed: state.isRunning
+                  ? null
+                  : () {
+                      context.read<DayBloc>().add(const DayRunEvent());
+                    },
               child: const SizedBox(
                 width: 50,
                 child: Center(
@@ -25,7 +29,11 @@ class ButtonPanel extends StatelessWidget {
               ),
             ),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: !state.isRunning
+                  ? null
+                  : () {
+                      context.read<DayBloc>().add(const DayPauseEvent());
+                    },
               child: const SizedBox(
                 width: 50,
                 child: Center(
@@ -34,7 +42,11 @@ class ButtonPanel extends StatelessWidget {
               ),
             ),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: !state.isRunning
+                  ? null
+                  : () {
+                      context.read<DayBloc>().add(const DayHaltEvent());
+                    },
               child: const SizedBox(
                 width: 50,
                 child: Center(

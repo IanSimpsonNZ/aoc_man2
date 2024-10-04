@@ -16,6 +16,7 @@ class SettingsMenu extends StatelessWidget {
     return BlocBuilder<DayBloc, DayState>(builder: (context, state) {
       if (state is DayReady) {
         return PopupMenuButton<HomeMenuAction>(
+          enabled: !state.isRunning,
           onSelected: (value) async {
             switch (value) {
               case HomeMenuAction.setRoot:

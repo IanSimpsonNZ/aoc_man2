@@ -2,6 +2,7 @@ import 'package:aoc_manager/constants/day_constants.dart';
 import 'package:aoc_manager/constants/pref_constants.dart';
 import 'package:aoc_manager/services/day_manager/bloc/day_manager_event.dart';
 import 'package:aoc_manager/services/day_manager/bloc/day_manager_state.dart';
+import 'package:aoc_manager/solutions/generic_solution.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:developer' as devtools show log;
@@ -13,12 +14,45 @@ class DayBloc extends Bloc<DayEvent, DayState> {
   int _partNum = 1;
   String? _dirName;
   String? _fileName;
+  bool _isRunning = false;
+  bool _isPaused = false;
 
-  String? get rootDir => _rootDir;
-  int get dayNum => _dayNum;
-  int get partNum => _partNum;
-  String get dirName => _dirName ?? (_rootDir ?? '');
-  String get fileName => _fileName ?? '';
+  final List<String> _messages = [''];
+
+  final solutions = [
+    [Solution(), Solution()], // 1
+    [Solution(), Solution()], // 2
+    [Solution(), Solution()], // 3
+    [Solution(), Solution()], // 4
+    [Solution(), Solution()], // 5
+    [Solution(), Solution()], // 6
+    [Solution(), Solution()], // 7
+    [Solution(), Solution()], // 8
+    [Solution(), Solution()], // 9
+    [Solution(), Solution()], // 10
+    [Solution(), Solution()], // 11
+    [Solution(), Solution()], // 12
+    [Solution(), Solution()], // 13
+    [Solution(), Solution()], // 14
+    [Solution(), Solution()], // 15
+    [Solution(), Solution()], // 16
+    [Solution(), Solution()], // 17
+    [Solution(), Solution()], // 18
+    [Solution(), Solution()], // 19
+    [Solution(), Solution()], // 20
+    [Solution(), Solution()], // 21
+    [Solution(), Solution()], // 22
+    [Solution(), Solution()], // 23
+    [Solution(), Solution()], // 24
+    [Solution(), Solution()], // 25
+  ];
+
+  // String? get rootDir => _rootDir;
+  // int get dayNum => _dayNum;
+  // int get partNum => _partNum;
+  // String get dirName => _dirName ?? (_rootDir ?? '');
+  // String get fileName => _fileName ?? '';
+  // bool get isRunning => _isRunning;
 
   String _dayPartKey() => '${appNamePrefKey}_${_dayNum}_part';
   String _dayDirKey() => '${appNamePrefKey}_${_dayNum}_dir';
@@ -30,12 +64,14 @@ class DayBloc extends Bloc<DayEvent, DayState> {
     _fileName = await _prefs.getString(_dayFileKey());
   }
 
-  DayReady _newDayData() => DayReady(
+  DayReady _newDayData(/* {String? newMessage} */) => DayReady(
         dayNum: _dayNum,
         partNum: _partNum,
         dirName: _dirName ?? (_rootDir ?? ''),
         fileName: _fileName ?? '',
         rootDir: _rootDir ?? '',
+        isRunning: _isRunning,
+        messages: _messages,
       );
 
   Future<void> initPrefs() async {
@@ -71,42 +107,48 @@ class DayBloc extends Bloc<DayEvent, DayState> {
     // Update Day
     on<DayChangeDayEvent>(
       (event, emit) async {
-        emit(const DayWorking());
-        _dayNum = event.newDay;
-        assert(_dayNum >= minDay && _dayNum <= maxDay);
-        await _prefs.setInt(dayNumPrefKey, event.newDay);
-        await getPrefsForDay();
-        emit(_newDayData());
+        if (!_isRunning) {
+          emit(const DayWorking());
+          _dayNum = event.newDay;
+          assert(_dayNum >= minDay && _dayNum <= maxDay);
+          await _prefs.setInt(dayNumPrefKey, event.newDay);
+          await getPrefsForDay();
+          emit(_newDayData());
+        }
       },
     );
 
     // Update Part
     on<DayChangePartEvent>(
       (event, emit) async {
-        emit(const DayWorking());
-        _partNum = event.newPart;
-        assert(_partNum == 1 || _partNum == 2);
-        await _prefs.setInt(_dayPartKey(), event.newPart);
-        emit(_newDayData());
+        if (!_isRunning) {
+          emit(const DayWorking());
+          _partNum = event.newPart;
+          assert(_partNum == 1 || _partNum == 2);
+          await _prefs.setInt(_dayPartKey(), event.newPart);
+          emit(_newDayData());
+        }
       },
     );
 
     // Update Dir
     on<DayChangeDirEvent>(
       (event, emit) async {
-        // Did we select a new directory?
-        if (event.newDir != null) {
-          emit(const DayWorking());
-          // If it's a new drectory, clear the file selection
-          if (event.newDir != _dirName) {
-            await _prefs.remove(_dayFileKey());
-            _fileName = null;
-          }
-          // and save the directory
-          await _prefs.setString(_dayDirKey(), event.newDir!);
-          _dirName = event.newDir;
+        if (!_isRunning) {
+          // Did we select a new directory?
+          if (event.newDir != null) {
+            emit(const DayWorking());
+            // If it's a new drectory, clear the file selection
+            if (event.newDir != _dirName) {
+              await _prefs.remove(_dayFileKey());
+              _fileName = null;
+            }
+            // and save the directory
+            await _prefs.setString(_dayDirKey(), event.newDir!);
+            _dirName = event.newDir;
 
-          emit(_newDayData());
+            emit(_newDayData());
+          }
         }
       },
     );
@@ -114,21 +156,23 @@ class DayBloc extends Bloc<DayEvent, DayState> {
     // Update file
     on<DayChangeFileEvent>(
       (event, emit) async {
-        // Did we select a new file?
-        if (event.newFile != null) {
-          assert(event.newFile!.count > 0);
-          emit(const DayWorking());
-          final fileName = event.newFile!.names.first;
-          final pathName =
-              event.newFile!.paths.first?.replaceAll('\\$fileName', '');
-          // Update the path if they navigated away from default
-          if (fileName != null) {
-            await _prefs.setString(_dayFileKey(), fileName);
-            _fileName = fileName;
-            await _prefs.setString(_dayDirKey(), pathName!);
-            _dirName = pathName;
+        if (!_isRunning) {
+          // Did we select a new file?
+          if (event.newFile != null) {
+            assert(event.newFile!.count > 0);
+            emit(const DayWorking());
+            final fileName = event.newFile!.names.first;
+            final pathName =
+                event.newFile!.paths.first?.replaceAll('\\$fileName', '');
+            // Update the path if they navigated away from default
+            if (fileName != null) {
+              await _prefs.setString(_dayFileKey(), fileName);
+              _fileName = fileName;
+              await _prefs.setString(_dayDirKey(), pathName!);
+              _dirName = pathName;
+            }
+            emit(_newDayData());
           }
-          emit(_newDayData());
         }
       },
     );
@@ -153,6 +197,50 @@ class DayBloc extends Bloc<DayEvent, DayState> {
         _rootDir = await _prefs.getString(rootDirPrefKey);
         await getPrefsForDay();
         emit(_newDayData());
+      },
+    );
+
+    // Run the selected solution
+    on<DayRunEvent>(
+      (event, emit) {
+        if (!_isRunning) {
+          if (_fileName != null && _fileName != '') {
+            _isRunning = true;
+            _messages.insert(
+                0, 'Running solution for day $_dayNum, part $_partNum');
+            emit(_newDayData());
+            for (int i = 0; i < 50; i++) {
+              _messages.insert(0, 'Line number $i');
+              emit(_newDayData());
+            }
+          } else {
+            devtools.log('Dialog saying no data selected');
+          }
+        }
+      },
+    );
+
+    // Toggle the pause mode
+    on<DayPauseEvent>(
+      (event, emit) {
+        if (_isRunning) {
+          if (_isPaused) {
+            devtools.log('Un-pausing');
+          } else {
+            devtools.log('Pausing');
+          }
+          _isPaused = !_isPaused;
+        }
+      },
+    );
+
+    // Halt the solutiion
+    on<DayHaltEvent>(
+      (event, emit) {
+        if (_isRunning) {
+          _isRunning = false;
+          emit(_newDayData());
+        }
       },
     );
   }

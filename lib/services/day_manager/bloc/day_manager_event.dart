@@ -39,3 +39,15 @@ class DayChangeRootDirEvent extends DayEvent {
 class DayClearPrefsEvent extends DayEvent {
   const DayClearPrefsEvent();
 }
+
+class DayRunEvent extends DayEvent {
+  const DayRunEvent();
+}
+
+class DayPauseEvent extends DayEvent {
+  const DayPauseEvent();
+}
+
+class DayHaltEvent extends DayEvent {
+  const DayHaltEvent();
+}
