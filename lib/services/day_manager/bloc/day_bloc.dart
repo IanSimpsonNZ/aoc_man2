@@ -4,6 +4,7 @@ import 'package:aoc_manager/services/day_manager/bloc/day_manager_event.dart';
 import 'package:aoc_manager/services/day_manager/bloc/day_manager_state.dart';
 import 'package:aoc_manager/services/day_manager/day_manager_exceptions.dart';
 import 'package:aoc_manager/solutions/day01_part1.dart';
+import 'package:aoc_manager/solutions/day01_part2.dart';
 import 'package:aoc_manager/solutions/generic_solution.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -23,7 +24,7 @@ class DayBloc extends Bloc<DayEvent, DayState> {
   final List<String> _messages = [];
 
   final _solutions = [
-    [Day01P1(), Solution()], // 1
+    [Day01P1(), Day01P2()], // 1
     [Solution(), Solution()], // 2
     [Solution(), Solution()], // 3
     [Solution(), Solution()], // 4
@@ -59,7 +60,7 @@ class DayBloc extends Bloc<DayEvent, DayState> {
 
   String _dayPartKey() => '${appNamePrefKey}_${_dayNum}_part';
   String _dayDirKey() => '${appNamePrefKey}_${_dayNum}_dir';
-  String _dayFileKey() => '${appNamePrefKey}_${_dayNum}_file';
+  String _dayFileKey() => '${appNamePrefKey}_${_dayNum}_${_partNum}_file';
 
   Future<void> _getPrefsForDay() async {
     _partNum = await _prefs.getInt(_dayPartKey()) ?? 1;
@@ -130,6 +131,7 @@ class DayBloc extends Bloc<DayEvent, DayState> {
           _partNum = event.newPart;
           assert(_partNum == 1 || _partNum == 2);
           await _prefs.setInt(_dayPartKey(), event.newPart);
+          await _getPrefsForDay();
           emit(_newDayData());
         }
       },

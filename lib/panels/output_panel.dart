@@ -53,10 +53,10 @@ class _OutputPanelState extends State<OutputPanel> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 0.0, vertical: 0.0),
                 // visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
-                child: Text(
+                child: SelectableText(
                   line,
                   maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  //overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
               );
