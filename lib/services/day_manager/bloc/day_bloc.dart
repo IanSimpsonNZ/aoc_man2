@@ -17,7 +17,7 @@ class DayBloc extends Bloc<DayEvent, DayState> {
   bool _isRunning = false;
   bool _isPaused = false;
 
-  final List<String> _messages = [''];
+  final List<String> _messages = [];
 
   final solutions = [
     [Solution(), Solution()], // 1
@@ -206,11 +206,10 @@ class DayBloc extends Bloc<DayEvent, DayState> {
         if (!_isRunning) {
           if (_fileName != null && _fileName != '') {
             _isRunning = true;
-            _messages.insert(
-                0, 'Running solution for day $_dayNum, part $_partNum');
+            _messages.add('Running solution for day $_dayNum, part $_partNum');
             emit(_newDayData());
             for (int i = 0; i < 50; i++) {
-              _messages.insert(0, 'Line number $i');
+              _messages.add('Line number $i');
               emit(_newDayData());
             }
           } else {

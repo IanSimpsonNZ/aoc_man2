@@ -36,7 +36,7 @@ class _OutputPanelState extends State<OutputPanel> {
           WidgetsBinding.instance
               .addPostFrameCallback((_) => _scrollToBottom());
           return ListView.builder(
-            reverse: true,
+            controller: _controller,
             prototypeItem: Container(
               padding:
                   const EdgeInsets.symmetric(horizontal: 0.0, vertical: 0.0),
