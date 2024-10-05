@@ -12,7 +12,7 @@ class ButtonPanel extends StatelessWidget {
     return BlocBuilder<DayBloc, DayState>(builder: (context, state) {
       if (state is DayReady) {
         return Wrap(
-          spacing: 65,
+          spacing: 20,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: <Widget>[
             ElevatedButton(
@@ -52,6 +52,17 @@ class ButtonPanel extends StatelessWidget {
                 width: 50,
                 child: Center(
                   child: Text('Halt'),
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                context.read<DayBloc>().add(const DayClearOutputEvent());
+              },
+              child: const SizedBox(
+                width: 50,
+                child: Center(
+                  child: Text('Clear'),
                 ),
               ),
             ),

@@ -59,3 +59,7 @@ class DaySendMessage extends DayEvent {
 
   const DaySendMessage({required this.message});
 }
+
+class DayClearOutputEvent extends DayEvent {
+  const DayClearOutputEvent();
+}

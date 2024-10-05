@@ -1,10 +1,11 @@
+// import 'dart:isolate';
+
 import 'package:aoc_manager/constants/day_constants.dart';
 import 'package:aoc_manager/constants/pref_constants.dart';
 import 'package:aoc_manager/services/day_manager/bloc/day_manager_event.dart';
 import 'package:aoc_manager/services/day_manager/bloc/day_manager_state.dart';
 import 'package:aoc_manager/services/day_manager/day_manager_exceptions.dart';
-import 'package:aoc_manager/solutions/day01_part1.dart';
-import 'package:aoc_manager/solutions/day01_part2.dart';
+import 'package:aoc_manager/solutions/day01.dart';
 import 'package:aoc_manager/solutions/generic_solution.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -77,6 +78,8 @@ class DayBloc extends Bloc<DayEvent, DayState> {
         isRunning: _isRunning,
         messages: _messages,
         exception,
+        // message,
+        // clearOutput,
       );
 
   Future<void> _initPrefs() async {
@@ -210,9 +213,9 @@ class DayBloc extends Bloc<DayEvent, DayState> {
       },
     );
 
-    // Run the selected solution
+// Run the selected solution
     on<DayRunEvent>(
-      (event, emit) {
+      (event, emit) async {
         if (!_isRunning) {
           if (_fileName != null && _fileName != '') {
             _isRunning = true;
@@ -220,10 +223,19 @@ class DayBloc extends Bloc<DayEvent, DayState> {
             _messages.add('Running solution for day $_dayNum, part $_partNum');
             _messages.add('Using : $file');
             emit(_newDayData());
-            final solution = _solutions[_dayNum - 1][_partNum - 1];
-            solution.run(file, event.dayEventHandler);
-            _isRunning = false;
-            emit(_newDayData());
+
+            final solution = _solutions[_dayNum - 1][_partNum - 1].run(file);
+            await emit.forEach(
+              solution,
+              onData: (message) {
+                if (message is String) {
+                  _messages.add(message);
+                } else if (message == null) {
+                  _isRunning = false;
+                }
+                return _newDayData();
+              },
+            );
           } else {
             emit(_newDayData(exception: DayNoFileSelectedException()));
           }
@@ -262,5 +274,66 @@ class DayBloc extends Bloc<DayEvent, DayState> {
         emit(_newDayData());
       },
     );
+
+    // Clear output panel
+    on<DayClearOutputEvent>(
+      (event, emit) {
+        _messages.clear();
+        emit(_newDayData());
+      },
+    );
   }
 }
+
+
+// // Run the selected solution
+//     on<DayRunEvent>(
+//       (event, emit) async {
+//         if (!_isRunning) {
+//           if (_fileName != null && _fileName != '') {
+//             _isRunning = true;
+//             final file = join(_dirName!, _fileName!);
+//             _messages.add('Running solution for day $_dayNum, part $_partNum');
+//             // emit(_newDayData(
+//             //     message: 'Running solution for day $_dayNum, part $_partNum'));
+//             _messages.add('Using : $file');
+//             emit(_newDayData());
+
+//             final solution = _solutions[_dayNum - 1][_partNum - 1];
+//             // solution.run(file, event.dayEventHandler);
+//             final receivePort = ReceivePort();
+//             receivePort.listen((dynamic message) {
+//               print('Message is ${message.toString()}');
+//               if (message is String) {
+//                 print('It is a string');
+//                 _messages.add(message);
+//                 // emit(_newDayData());
+//               } else if (message == null) {
+//                 print('Closing down.  The buuffer is:');
+//                 for (final line in _messages) {
+//                   print(line);
+//                 }
+//                 _isRunning = false;
+//                 // emit(_newDayData());
+//               }
+//             });
+//             final isolate = await Isolate.spawn(solution.run,
+//                 SolutionArgs(sendPort: receivePort.sendPort, fileName: file));
+//             // await for (var message in receivePort) {
+//             //   if (message == null) {
+//             //     break;
+//             //   }
+//             //   if (message is String) {
+//             //     _messages.add(message);
+//             //     emit(_newDayData());
+//             //   }
+//             // }
+
+//             // _isRunning = false;
+//             // emit(_newDayData());
+//           } else {
+//             emit(_newDayData(exception: DayNoFileSelectedException()));
+//           }
+//         }
+//       },
+//     );
