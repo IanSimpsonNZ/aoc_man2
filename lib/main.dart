@@ -63,13 +63,6 @@ class _MyHomePageState extends State<MyHomePage> {
           }
         }
       },
-      // builder: (context, state) {
-      //   if (state is DayWorking) {
-      //     return const Scaffold(
-      //       body: CircularProgressIndicator(),
-      //     );
-      //   } else if (state is DayReady) {
-      //     return Scaffold(
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -103,16 +96,6 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
       ),
-      // } else {
-      //   return Scaffold(
-      //     appBar: AppBar(
-      //       title: const Text('Something bad happened'),
-      //       backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      //     ),
-      //     body: const CircularProgressIndicator(),
     );
-    //   }
-    // },
-    // );
   }
 }

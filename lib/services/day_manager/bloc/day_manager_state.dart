@@ -23,13 +23,9 @@ class DayReady extends DayState {
   final bool isPaused;
   final List<String> messages;
   final Exception? exception;
-  //final String? message;
-  //final bool clearOutput;
 
   const DayReady(
     this.exception, {
-    // this.message,
-    // this.clearOutput, {
     required this.dayNum,
     required this.partNum,
     required this.dirName,

@@ -1,5 +1,3 @@
-// import 'dart:isolate';
-
 import 'dart:isolate';
 
 import 'package:aoc_manager/constants/day_constants.dart';
@@ -58,13 +56,6 @@ class DayBloc extends Bloc<DayEvent, DayState> {
     [Solution(), Solution()], // 25
   ];
 
-  // String? get rootDir => _rootDir;
-  // int get dayNum => _dayNum;
-  // int get partNum => _partNum;
-  // String get dirName => _dirName ?? (_rootDir ?? '');
-  // String get fileName => _fileName ?? '';
-  // bool get isRunning => _isRunning;
-
   String _dayPartKey() => '${appNamePrefKey}_${_dayNum}_part';
   String _dayDirKey() => '${appNamePrefKey}_${_dayNum}_dir';
   String _dayFileKey() => '${appNamePrefKey}_${_dayNum}_${_partNum}_file';
@@ -85,8 +76,6 @@ class DayBloc extends Bloc<DayEvent, DayState> {
         isPaused: _isPaused,
         messages: _messages,
         exception,
-        // message,
-        // clearOutput,
       );
 
   Future<void> _initPrefs() async {
@@ -231,13 +220,6 @@ class DayBloc extends Bloc<DayEvent, DayState> {
             _messages.add('Using : $file');
             emit(_newDayData());
 
-            // Solution is a Streamcontroller
-            // solution onListen kicks off the task as an isolate
-            // Assigns the receiveport to the Streamcontrollers stream using addStream!!!!
-            // Then this should work!
-            // Keep Solution as a class member and use pause, resume (results in bufferring)
-            // onCancel executes isolate.kill!!
-
             _solution = _solutions[_dayNum - 1][_partNum - 1];
             _solution!.init(file);
             final initPort = RawReceivePort();
@@ -245,6 +227,7 @@ class DayBloc extends Bloc<DayEvent, DayState> {
                 await Isolate.spawn(_solution!.solution, initPort.sendPort);
             _solutionTask!.addOnExitListener(initPort.sendPort, response: null);
             final receivePort = ReceivePort.fromRawReceivePort(initPort);
+
             await emit.forEach(
               receivePort,
               onData: (message) {
@@ -316,56 +299,3 @@ class DayBloc extends Bloc<DayEvent, DayState> {
     );
   }
 }
-
-
-// // Run the selected solution
-//     on<DayRunEvent>(
-//       (event, emit) async {
-//         if (!_isRunning) {
-//           if (_fileName != null && _fileName != '') {
-//             _isRunning = true;
-//             final file = join(_dirName!, _fileName!);
-//             _messages.add('Running solution for day $_dayNum, part $_partNum');
-//             // emit(_newDayData(
-//             //     message: 'Running solution for day $_dayNum, part $_partNum'));
-//             _messages.add('Using : $file');
-//             emit(_newDayData());
-
-//             final solution = _solutions[_dayNum - 1][_partNum - 1];
-//             // solution.run(file, event.dayEventHandler);
-//             final receivePort = ReceivePort();
-//             receivePort.listen((dynamic message) {
-//               print('Message is ${message.toString()}');
-//               if (message is String) {
-//                 print('It is a string');
-//                 _messages.add(message);
-//                 // emit(_newDayData());
-//               } else if (message == null) {
-//                 print('Closing down.  The buuffer is:');
-//                 for (final line in _messages) {
-//                   print(line);
-//                 }
-//                 _isRunning = false;
-//                 // emit(_newDayData());
-//               }
-//             });
-//             final isolate = await Isolate.spawn(solution.run,
-//                 SolutionArgs(sendPort: receivePort.sendPort, fileName: file));
-//             // await for (var message in receivePort) {
-//             //   if (message == null) {
-//             //     break;
-//             //   }
-//             //   if (message is String) {
-//             //     _messages.add(message);
-//             //     emit(_newDayData());
-//             //   }
-//             // }
-
-//             // _isRunning = false;
-//             // emit(_newDayData());
-//           } else {
-//             emit(_newDayData(exception: DayNoFileSelectedException()));
-//           }
-//         }
-//       },
-//     );
