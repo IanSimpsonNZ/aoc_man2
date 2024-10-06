@@ -1,9 +1,16 @@
+import 'dart:isolate';
+
+import 'dart:developer' as devtools show log;
+
 import 'package:aoc_manager/solutions/generic_solution.dart';
 
 class Day01P1 extends Solution {
   @override
-  Stream<String> solution() async* {
-    yield 'Day 1 Part 1';
+  Future<void> solution(SendPort sendPort) async {
+    devtools.log("We're in!");
+    const String msg = 'Day 1 Part 1';
+    devtools.log('Sending: $msg of type ${msg.runtimeType}');
+    say('Day 1 Part 1', sendPort);
     var total = 0;
     var maxTotal = 0;
     await for (final line in lines()) {
@@ -16,15 +23,15 @@ class Day01P1 extends Solution {
         total = 0;
       }
     }
-    yield 'The answer is $maxTotal';
+    say('The answer is $maxTotal', sendPort);
   }
 }
 
 class Day01P2 extends Solution {
   var _top3 = [0, 0, 0];
   @override
-  Stream<String> solution() async* {
-    yield 'Day 1 Part 2';
+  Future<void> solution(SendPort sendPort) async {
+    say('Day 1 Part 2', sendPort);
     var total = 0;
     _top3 = [0, 0, 0];
     await for (final line in lines()) {
@@ -37,9 +44,9 @@ class Day01P2 extends Solution {
     }
     _slotIn(total);
 
-    yield 'top3 are ${_top3.toString()}';
+    say('top3 are ${_top3.toString()}', sendPort);
     final answer = _top3.reduce((a, b) => a + b);
-    yield answer.toString();
+    say(answer.toString(), sendPort);
   }
 
   void _slotIn(newTot) {

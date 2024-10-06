@@ -20,6 +20,7 @@ class DayReady extends DayState {
   final String fileName;
   final String rootDir;
   final bool isRunning;
+  final bool isPaused;
   final List<String> messages;
   final Exception? exception;
   //final String? message;
@@ -35,6 +36,7 @@ class DayReady extends DayState {
     required this.fileName,
     required this.rootDir,
     required this.isRunning,
+    required this.isPaused,
     required this.messages,
   });
 }

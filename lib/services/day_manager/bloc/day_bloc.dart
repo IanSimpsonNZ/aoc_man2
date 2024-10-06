@@ -1,5 +1,7 @@
 // import 'dart:isolate';
 
+import 'dart:isolate';
+
 import 'package:aoc_manager/constants/day_constants.dart';
 import 'package:aoc_manager/constants/pref_constants.dart';
 import 'package:aoc_manager/services/day_manager/bloc/day_manager_event.dart';
@@ -23,6 +25,10 @@ class DayBloc extends Bloc<DayEvent, DayState> {
   bool _isPaused = false;
 
   final List<String> _messages = [];
+
+  Solution? _solution;
+  Capability? _pausedCapability;
+  Isolate? _solutionTask;
 
   final _solutions = [
     [Day01P1(), Day01P2()], // 1
@@ -76,6 +82,7 @@ class DayBloc extends Bloc<DayEvent, DayState> {
         fileName: _fileName ?? '',
         rootDir: _rootDir ?? '',
         isRunning: _isRunning,
+        isPaused: _isPaused,
         messages: _messages,
         exception,
         // message,
@@ -224,14 +231,29 @@ class DayBloc extends Bloc<DayEvent, DayState> {
             _messages.add('Using : $file');
             emit(_newDayData());
 
-            final solution = _solutions[_dayNum - 1][_partNum - 1].run(file);
+            // Solution is a Streamcontroller
+            // solution onListen kicks off the task as an isolate
+            // Assigns the receiveport to the Streamcontrollers stream using addStream!!!!
+            // Then this should work!
+            // Keep Solution as a class member and use pause, resume (results in bufferring)
+            // onCancel executes isolate.kill!!
+
+            _solution = _solutions[_dayNum - 1][_partNum - 1];
+            _solution!.init(file);
+            final initPort = RawReceivePort();
+            _solutionTask =
+                await Isolate.spawn(_solution!.solution, initPort.sendPort);
+            _solutionTask!.addOnExitListener(initPort.sendPort, response: null);
+            final receivePort = ReceivePort.fromRawReceivePort(initPort);
             await emit.forEach(
-              solution,
+              receivePort,
               onData: (message) {
+                devtools.log('Got ... ${message.toString()}');
                 if (message is String) {
                   _messages.add(message);
                 } else if (message == null) {
                   _isRunning = false;
+                  _messages.add('Process finished');
                 }
                 return _newDayData();
               },
@@ -248,11 +270,15 @@ class DayBloc extends Bloc<DayEvent, DayState> {
       (event, emit) {
         if (_isRunning) {
           if (_isPaused) {
-            devtools.log('Un-pausing');
+            devtools.log('Un-pausing from DayBloc');
+            _solutionTask!.resume(_pausedCapability!);
+            _pausedCapability = null;
           } else {
             devtools.log('Pausing');
+            _pausedCapability = _solutionTask!.pause();
           }
           _isPaused = !_isPaused;
+          emit(_newDayData());
         }
       },
     );
@@ -261,6 +287,12 @@ class DayBloc extends Bloc<DayEvent, DayState> {
     on<DayHaltEvent>(
       (event, emit) {
         if (_isRunning) {
+          if (_isPaused) {
+            _solutionTask!.resume(_pausedCapability!);
+            _isPaused = false;
+            _pausedCapability = null;
+          }
+          _solutionTask!.kill();
           _isRunning = false;
           emit(_newDayData());
         }

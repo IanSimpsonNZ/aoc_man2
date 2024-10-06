@@ -12,7 +12,7 @@ class ButtonPanel extends StatelessWidget {
     return BlocBuilder<DayBloc, DayState>(builder: (context, state) {
       if (state is DayReady) {
         return Wrap(
-          spacing: 20,
+          spacing: 10,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: <Widget>[
             ElevatedButton(
@@ -23,7 +23,7 @@ class ButtonPanel extends StatelessWidget {
                       dayEventHandler.add(DayRunEvent(dayEventHandler));
                     },
               child: const SizedBox(
-                width: 50,
+                width: 55,
                 child: Center(
                   child: Text('Run'),
                 ),
@@ -35,10 +35,10 @@ class ButtonPanel extends StatelessWidget {
                   : () {
                       context.read<DayBloc>().add(const DayPauseEvent());
                     },
-              child: const SizedBox(
-                width: 50,
+              child: SizedBox(
+                width: 55,
                 child: Center(
-                  child: Text('Pause'),
+                  child: Text(state.isPaused ? 'Resume' : 'Pause'),
                 ),
               ),
             ),
@@ -49,7 +49,7 @@ class ButtonPanel extends StatelessWidget {
                       context.read<DayBloc>().add(const DayHaltEvent());
                     },
               child: const SizedBox(
-                width: 50,
+                width: 55,
                 child: Center(
                   child: Text('Halt'),
                 ),
@@ -60,7 +60,7 @@ class ButtonPanel extends StatelessWidget {
                 context.read<DayBloc>().add(const DayClearOutputEvent());
               },
               child: const SizedBox(
-                width: 50,
+                width: 55,
                 child: Center(
                   child: Text('Clear'),
                 ),
