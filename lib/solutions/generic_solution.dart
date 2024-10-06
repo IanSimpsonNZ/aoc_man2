@@ -2,15 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'dart:developer' as devtools show log;
-
 import 'dart:isolate';
 
 class Solution {
   String? _inputFile;
 
   void init(String fileName) async {
-    devtools.log('Starting init');
     _inputFile = fileName;
   }
 

@@ -6,6 +6,8 @@ import 'package:aoc_manager/services/day_manager/bloc/day_manager_event.dart';
 import 'package:aoc_manager/services/day_manager/bloc/day_manager_state.dart';
 import 'package:aoc_manager/services/day_manager/day_manager_exceptions.dart';
 import 'package:aoc_manager/solutions/day01.dart';
+import 'package:aoc_manager/solutions/day02.dart';
+import 'package:aoc_manager/solutions/day25.dart';
 import 'package:aoc_manager/solutions/generic_solution.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -30,7 +32,7 @@ class DayBloc extends Bloc<DayEvent, DayState> {
 
   final _solutions = [
     [Day01P1(), Day01P2()], // 1
-    [Solution(), Solution()], // 2
+    [Day02P1(), Day02P2()], // 2
     [Solution(), Solution()], // 3
     [Solution(), Solution()], // 4
     [Solution(), Solution()], // 5
@@ -53,7 +55,7 @@ class DayBloc extends Bloc<DayEvent, DayState> {
     [Solution(), Solution()], // 22
     [Solution(), Solution()], // 23
     [Solution(), Solution()], // 24
-    [Solution(), Solution()], // 25
+    [Day25P1(), Day25P2()], // 25
   ];
 
   String _dayPartKey() => '${appNamePrefKey}_${_dayNum}_part';
@@ -231,7 +233,6 @@ class DayBloc extends Bloc<DayEvent, DayState> {
             await emit.forEach(
               receivePort,
               onData: (message) {
-                devtools.log('Got ... ${message.toString()}');
                 if (message is String) {
                   _messages.add(message);
                 } else if (message == null) {
@@ -253,11 +254,9 @@ class DayBloc extends Bloc<DayEvent, DayState> {
       (event, emit) {
         if (_isRunning) {
           if (_isPaused) {
-            devtools.log('Un-pausing from DayBloc');
             _solutionTask!.resume(_pausedCapability!);
             _pausedCapability = null;
           } else {
-            devtools.log('Pausing');
             _pausedCapability = _solutionTask!.pause();
           }
           _isPaused = !_isPaused;
@@ -268,16 +267,25 @@ class DayBloc extends Bloc<DayEvent, DayState> {
 
     // Halt the solutiion
     on<DayHaltEvent>(
-      (event, emit) {
+      (event, emit) async {
         if (_isRunning) {
           if (_isPaused) {
             _solutionTask!.resume(_pausedCapability!);
             _isPaused = false;
             _pausedCapability = null;
           }
-          _solutionTask!.kill();
-          _isRunning = false;
+          _messages.add('Requesting process halt ...');
           emit(_newDayData());
+          _solutionTask!.kill(priority: Isolate.beforeNextEvent);
+          await Future.delayed(const Duration(seconds: 1));
+          if (_isRunning) {
+            // _isRunning will be set to false by the isolate OnExitListener if the halt request worked
+            _messages.add('Halt request ignored - issuing kill request ...');
+            emit(_newDayData());
+            _solutionTask!.kill(priority: Isolate.immediate);
+          }
+          //_isRunning = false;
+          //emit(_newDayData());
         }
       },
     );

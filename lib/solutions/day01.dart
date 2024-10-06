@@ -1,15 +1,10 @@
 import 'dart:isolate';
 
-import 'dart:developer' as devtools show log;
-
 import 'package:aoc_manager/solutions/generic_solution.dart';
 
 class Day01P1 extends Solution {
   @override
   Future<void> solution(SendPort sendPort) async {
-    devtools.log("We're in!");
-    const String msg = 'Day 1 Part 1';
-    devtools.log('Sending: $msg of type ${msg.runtimeType}');
     say('Day 1 Part 1', sendPort);
     var total = 0;
     var maxTotal = 0;
