@@ -101,6 +101,33 @@ class DayBloc extends Bloc<DayEvent, DayState> {
     await _getPrefsForDay();
   }
 
+  // void _addMessage(String newMessage) {
+  //   if (_messages.isEmpty) {
+  //     _messages.add(newMessage);
+  //   } else {
+  //     _messages.last = '${_messages.last}$newMessage';
+  //   }
+  // }
+
+  // Display stuff on the output panel
+  void _disp(String newMessage, {Emitter? emit, bool ensureNewLine = false}) {
+    if (_messages.isEmpty) {
+      _messages.add(newMessage);
+    } else {
+      if (ensureNewLine && _messages.last != '') {
+        _messages.add('');
+      }
+      _messages.last = '${_messages.last}$newMessage';
+    }
+    if (emit != null) emit(_newDayData());
+  }
+
+  void _dispLn(String newMessage, {Emitter? emit, bool ensureNewLine = false}) {
+    _disp(newMessage, ensureNewLine: ensureNewLine);
+    _messages.add('');
+    if (emit != null) emit(_newDayData());
+  }
+
   DayBloc() : super(const DayUninitialised()) {
     // Initiate - get previous settings, or create them if first run
     on<DayInitialiseEvent>((event, emit) async {
@@ -218,9 +245,10 @@ class DayBloc extends Bloc<DayEvent, DayState> {
           if (_fileName != null && _fileName != '') {
             _isRunning = true;
             final file = join(_dirName!, _fileName!);
-            _messages.add('Running solution for day $_dayNum, part $_partNum');
-            _messages.add('Using : $file');
-            emit(_newDayData());
+            _dispLn('');
+            _dispLn('Running solution for day $_dayNum, part $_partNum');
+            _dispLn('Using : $file', emit: emit);
+            //emit(_newDayData());
 
             _solution = _solutions[_dayNum - 1][_partNum - 1];
             _solution!.init(file);
@@ -237,7 +265,8 @@ class DayBloc extends Bloc<DayEvent, DayState> {
                   _messages.add(message);
                 } else if (message == null) {
                   _isRunning = false;
-                  _messages.add('Process finished');
+                  _dispLn('Process finished', ensureNewLine: true);
+                  //_messages.add('Process finished');
                 }
                 return _newDayData();
               },
@@ -274,19 +303,24 @@ class DayBloc extends Bloc<DayEvent, DayState> {
             _isPaused = false;
             _pausedCapability = null;
           }
-          _messages.add('Requesting process halt ...');
-          emit(_newDayData());
+          _dispLn('Requesting process halt ...',
+              emit: emit, ensureNewLine: true);
+          //emit(_newDayData());
           _solutionTask!.kill(priority: Isolate.beforeNextEvent);
+          await Future.delayed(const Duration(seconds: 1));
+
           for (int i = 3; i > 0; i--) {
-            await Future.delayed(const Duration(seconds: 1));
             if (!_isRunning) break;
-            _messages.add('$i ...');
-            emit(_newDayData());
+            _disp('$i ... ', emit: emit);
+            await Future.delayed(const Duration(seconds: 1));
+            //emit(_newDayData());
           }
           if (_isRunning) {
             // _isRunning will be set to false by the isolate OnExitListener if the halt request worked
-            _messages.add('Halt request ignored - issuing kill request ...');
-            emit(_newDayData());
+            //_messages.add('');
+            _dispLn('Halt request ignored - issuing kill request ...',
+                emit: emit, ensureNewLine: true);
+            //emit(_newDayData());
             _solutionTask!.kill(priority: Isolate.immediate);
           }
           //_isRunning = false;
@@ -298,8 +332,8 @@ class DayBloc extends Bloc<DayEvent, DayState> {
     // Messages to output panel
     on<DaySendMessage>(
       (event, emit) {
-        _messages.add(event.message);
-        emit(_newDayData());
+        _dispLn(event.message, emit: emit);
+        //emit(_newDayData());
       },
     );
 
