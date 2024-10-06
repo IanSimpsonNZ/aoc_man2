@@ -277,7 +277,12 @@ class DayBloc extends Bloc<DayEvent, DayState> {
           _messages.add('Requesting process halt ...');
           emit(_newDayData());
           _solutionTask!.kill(priority: Isolate.beforeNextEvent);
-          await Future.delayed(const Duration(seconds: 1));
+          for (int i = 3; i > 0; i--) {
+            await Future.delayed(const Duration(seconds: 1));
+            if (!_isRunning) break;
+            _messages.add('$i ...');
+            emit(_newDayData());
+          }
           if (_isRunning) {
             // _isRunning will be set to false by the isolate OnExitListener if the halt request worked
             _messages.add('Halt request ignored - issuing kill request ...');
