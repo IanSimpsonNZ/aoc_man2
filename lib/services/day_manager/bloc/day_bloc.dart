@@ -33,7 +33,7 @@ class DayBloc extends Bloc<DayEvent, DayState> {
   Capability? _pausedCapability;
   Isolate? _solutionTask;
 
-  final _solutions = [
+  final List<List<Solution>> _solutions = [
     [Day01P1(), Day01P2()], // 1
     [Day02P1(), Day02P2()], // 2
     [Day03P1(), Day03P2()], // 3
