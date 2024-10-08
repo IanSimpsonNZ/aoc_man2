@@ -7,6 +7,9 @@ import 'package:aoc_manager/services/day_manager/bloc/day_manager_state.dart';
 import 'package:aoc_manager/services/day_manager/day_manager_exceptions.dart';
 import 'package:aoc_manager/solutions/day01.dart';
 import 'package:aoc_manager/solutions/day02.dart';
+import 'package:aoc_manager/solutions/day03.dart';
+import 'package:aoc_manager/solutions/day04.dart';
+import 'package:aoc_manager/solutions/day05.dart';
 import 'package:aoc_manager/solutions/day25.dart';
 import 'package:aoc_manager/solutions/generic_solution.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -33,9 +36,9 @@ class DayBloc extends Bloc<DayEvent, DayState> {
   final _solutions = [
     [Day01P1(), Day01P2()], // 1
     [Day02P1(), Day02P2()], // 2
-    [Solution(), Solution()], // 3
-    [Solution(), Solution()], // 4
-    [Solution(), Solution()], // 5
+    [Day03P1(), Day03P2()], // 3
+    [Day04P1(), Day04P2()], // 4
+    [Day05P1(), Day05P2()], // 5
     [Solution(), Solution()], // 6
     [Solution(), Solution()], // 7
     [Solution(), Solution()], // 8

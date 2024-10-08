@@ -43,6 +43,7 @@ dependencies:
   extended_text: ^14.1.0
   bloc: ^8.1.4
   flutter_bloc: ^8.1.6
+  collection: ^1.18.0
 
 dev_dependencies:
   flutter_test:
