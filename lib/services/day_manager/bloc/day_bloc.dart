@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:isolate';
 
 import 'package:aoc_manager/constants/day_constants.dart';
@@ -12,6 +13,7 @@ import 'package:aoc_manager/solutions/day04.dart';
 import 'package:aoc_manager/solutions/day05.dart';
 import 'package:aoc_manager/solutions/day06.dart';
 import 'package:aoc_manager/solutions/day07.dart';
+import 'package:aoc_manager/solutions/day08.dart';
 import 'package:aoc_manager/solutions/day25.dart';
 import 'package:aoc_manager/solutions/generic_solution.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -43,7 +45,7 @@ class DayBloc extends Bloc<DayEvent, DayState> {
     [Day05P1(), Day05P2()], // 5
     [Day06P1(), Day06P2()], // 6
     [Day07P1(), Day07P2()], // 7
-    [Solution(), Solution()], // 8
+    [Day08P1(), Day08P2()], // 8
     [Solution(), Solution()], // 9
     [Solution(), Solution()], // 10
     [Solution(), Solution()], // 11
@@ -253,7 +255,6 @@ class DayBloc extends Bloc<DayEvent, DayState> {
             _dispLn('');
             _dispLn('Running solution for day $_dayNum, part $_partNum');
             _dispLn('Using : $file', emit: emit);
-            //emit(_newDayData());
 
             _solution = _solutions[_dayNum - 1][_partNum - 1];
             _solution!.init(file);
@@ -266,20 +267,36 @@ class DayBloc extends Bloc<DayEvent, DayState> {
             await emit.forEach(
               receivePort,
               onData: (message) {
-                if (message is String) {
-                  _messages.add(message);
-                } else if (message == null) {
-                  _isRunning = false;
-                  _dispLn('Process finished', ensureNewLine: true);
-                  //_messages.add('Process finished');
+                if (message is RemoteError) {
+                  return _newDayData(
+                      exception: RemoteErrorException(error: message));
+                } else {
+                  if (message is String) {
+                    _messages.add(message);
+                  } else if (message == null) {
+                    _isRunning = false;
+                    _dispLn('Process finished', ensureNewLine: true);
+                  }
+                  return _newDayData();
                 }
-                return _newDayData();
               },
             );
           } else {
             emit(_newDayData(exception: DayNoFileSelectedException()));
           }
         }
+      },
+    );
+
+    on<DayShowStackTraceEvent>(
+      (event, emit) {
+        final stackTrace =
+            const LineSplitter().convert(event.error.stackTrace.toString());
+        _dispLn(event.error.toString());
+        for (final line in stackTrace) {
+          _dispLn(line);
+        }
+        _dispLn('', emit: emit);
       },
     );
 

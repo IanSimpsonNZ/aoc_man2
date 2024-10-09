@@ -8,8 +8,10 @@ import 'package:aoc_manager/services/day_manager/bloc/day_manager_event.dart';
 import 'package:aoc_manager/services/day_manager/bloc/day_manager_state.dart';
 import 'package:aoc_manager/services/day_manager/day_manager_exceptions.dart';
 import 'package:aoc_manager/utilities/dialogs/error_dialog.dart';
+import 'package:aoc_manager/utilities/dialogs/error_in_isolate_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'dart:developer' as devtools show log;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -60,6 +62,20 @@ class _MyHomePageState extends State<MyHomePage> {
               context,
               'A data file needs to be selected',
             );
+          } else if (state.exception is RemoteErrorException) {
+            devtools.log('Caught remote error');
+            final remoteError = state.exception as RemoteErrorException;
+            final showTrace = await errorInIsolateDialog(
+                context, remoteError.error.toString());
+            if (showTrace) {
+              if (context.mounted) {
+                context
+                    .read<DayBloc>()
+                    .add(DayShowStackTraceEvent(error: remoteError.error));
+              } else {
+                devtools.log('main - RemoteError -  context not mounted');
+              }
+            }
           }
         }
       },

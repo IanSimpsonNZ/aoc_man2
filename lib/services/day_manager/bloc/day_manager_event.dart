@@ -63,3 +63,9 @@ class DaySendMessage extends DayEvent {
 class DayClearOutputEvent extends DayEvent {
   const DayClearOutputEvent();
 }
+
+class DayShowStackTraceEvent extends DayEvent {
+  final Error error;
+
+  const DayShowStackTraceEvent({required this.error});
+}

@@ -28,6 +28,16 @@ class Solution {
   Future<void> solution(SendPort newSendPort) async {
     sendPort = newSendPort;
 
+    try {
+      await specificSolution(say);
+      say('Done');
+    } catch (e) {
+      final err = e as Error;
+      sendPort?.send(RemoteError(err.toString(), err.stackTrace.toString()));
+    }
+  }
+
+  Future<void> specificSolution(void Function(String) say) async {
     say("Generic Solution");
     await for (final line in lines()) {
       await Future.delayed(const Duration(seconds: 1));
