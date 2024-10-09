@@ -10,6 +10,8 @@ class Solution {
   String? _inputFile;
   SendPort? sendPort;
 
+  get inputFile => _inputFile;
+
   void init(String fileName) async {
     _inputFile = fileName;
   }
