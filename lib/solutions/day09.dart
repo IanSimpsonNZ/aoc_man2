@@ -22,7 +22,6 @@ class Coord {
 const numSegments = 10;
 
 class Rope {
-  // Coord head = Coord(0, 0);
   List<Coord> rope;
   Set<Coord> tailTrack1 = {Coord(0, 0)};
   Set<Coord> tailTrack9 = {Coord(0, 0)};
