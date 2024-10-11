@@ -33,7 +33,7 @@ class _DayPanelState extends State<DayPanel> {
                 haptics: true,
                 textStyle: Theme.of(context).textTheme.bodyMedium,
                 selectedTextStyle: Theme.of(context).textTheme.headlineSmall,
-                itemHeight: 50.0,
+                itemHeight: 70.0,
                 itemWidth: 50.0,
                 onChanged: (value) {
                   context.read<DayBloc>().add(DayChangeDayEvent(value));

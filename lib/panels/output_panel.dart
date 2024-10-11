@@ -2,6 +2,7 @@ import 'package:aoc_manager/services/day_manager/bloc/day_bloc.dart';
 import 'package:aoc_manager/services/day_manager/bloc/day_manager_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class OutputPanel extends StatefulWidget {
   const OutputPanel({super.key});
@@ -45,7 +46,8 @@ class _OutputPanelState extends State<OutputPanel> {
                 child: SelectableText(
                   line,
                   maxLines: 1,
-                  style: Theme.of(context).textTheme.bodyLarge,
+                  style: GoogleFonts.robotoMono(
+                      textStyle: Theme.of(context).textTheme.bodyLarge),
                 ),
               );
             },
