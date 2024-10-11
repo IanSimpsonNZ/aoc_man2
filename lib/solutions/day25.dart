@@ -1,5 +1,3 @@
-import 'dart:isolate';
-
 import 'package:aoc_manager/solutions/generic_solution.dart';
 
 //import 'dart:developer' as devtools show log;
