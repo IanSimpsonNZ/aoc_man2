@@ -1,23 +1,9 @@
 //import 'dart:convert';
 
 import 'package:aoc_manager/solutions/generic_solution.dart';
+import 'package:aoc_manager/solutions/helpers/coord.dart';
 
 import 'dart:developer' as devtools show log;
-
-class Coord {
-  int x;
-  int y;
-
-  Coord(this.x, this.y);
-
-  Coord operator +(Coord c) => Coord(x + c.x, y + c.y);
-  Coord operator -(Coord c) => Coord(x - c.x, y - c.y);
-  @override
-  bool operator ==(Object other) =>
-      other is Coord && x == other.x && y == other.y;
-  @override
-  int get hashCode => Object.hash(x, y);
-}
 
 const numSegments = 10;
 
