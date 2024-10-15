@@ -13,4 +13,6 @@ class Coord {
   int get hashCode => Object.hash(x, y);
 
   Coord clone() => Coord(x, y);
+
+  String print() => '($x, $y)';
 }
