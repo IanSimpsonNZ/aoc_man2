@@ -26,8 +26,7 @@ class Valve {
 }
 
 class ValveMap {
-  List<Valve> valves = [];
-  Map<String, int> idLookup = {};
+  Map<String, Valve> valves = {};
   Map<String, int> minDist = {};
   int counter = 0;
   int flowAvailable = 0;
@@ -51,9 +50,8 @@ class ValveMap {
       for (int i = connStart; i < words.length; i++) {
         connections.add(words[i].replaceAll(',', ''));
       }
-      valves.add(Valve(
-          id: id, name: name, flowRate: flowRate, connections: connections));
-      idLookup[name] = id;
+      valves[name] = Valve(
+          id: id, name: name, flowRate: flowRate, connections: connections);
     }
   }
 
@@ -76,12 +74,7 @@ class ValveMap {
     Set<String> nextBorder = {};
     while (border.isNotEmpty) {
       for (final thisValve in border) {
-        final thisValveIdx = idLookup[thisValve];
-        if (thisValveIdx == null) {
-          devtools.log("Can't find id of $thisValve");
-          return null;
-        }
-        for (final nextValve in valves[thisValveIdx].connections) {
+        for (final nextValve in valves[thisValve]!.connections) {
           if (nextValve == fromName) {
             return numSteps;
           }
@@ -96,25 +89,23 @@ class ValveMap {
   }
 
   void calcMinDist() {
-    for (int fromIdx = 0; fromIdx < valves.length - 1; fromIdx++) {
-      for (int toIdx = fromIdx + 1; toIdx < valves.length; toIdx++) {
-        final fromName = valves[fromIdx].name;
-        final toName = valves[toIdx].name;
-        int? thisDist = getDist3(fromName, toName);
+    for (final fromValve in valves.values) {
+      for (final toValve
+          in valves.values.where((v) => v.name != fromValve.name)) {
+        int? thisDist = getDist3(fromValve.name, toValve.name);
         if (thisDist != null) {
-          minDist[minDistKey(fromName, toName)] = thisDist;
+          minDist[minDistKey(fromValve.name, toValve.name)] = thisDist;
         }
       }
     }
   }
 
   void printMinDist() {
-    for (int fromId = 0; fromId < valves.length - 1; fromId++) {
-      for (int toId = fromId + 1; toId < valves.length; toId++) {
-        final fromName = valves[fromId].name;
-        final toName = valves[toId].name;
-        final key = minDistKey(fromName, toName);
-        devtools.log('$fromName to $toName = ${minDist[key]}');
+    for (final fromValve in valves.values) {
+      for (final toValve
+          in valves.values.where((v) => v.name != fromValve.name)) {
+        final key = minDistKey(fromValve.name, toValve.name);
+        devtools.log('${fromValve.name} to ${toValve.name} = ${minDist[key]}');
       }
     }
   }
@@ -247,7 +238,8 @@ class Day16P1 extends Solution {
     say('Calculating minimum distances');
     map.calcMinDist();
 
-    final valvesWithPressure = map.valves.where((v) => v.flowRate > 0).toList();
+    final valvesWithPressure =
+        map.valves.values.where((v) => v.flowRate > 0).toList();
     say('${valvesWithPressure.map((v) => v.name)} have pressure');
 
     valvesWithPressure.sort((a, b) => b.flowRate - a.flowRate);
@@ -453,7 +445,7 @@ int dualMaxFlow(
 class Day16P2 extends Solution {
   @override
   Future<void> specificSolution(void Function(String) say) async {
-    say('Day 15 Part 2');
+    say('Day 16 Part 2');
 
     var map = ValveMap(say);
     await map.getMap(lines());
@@ -461,7 +453,8 @@ class Day16P2 extends Solution {
     say('Calculating minimum distances');
     map.calcMinDist();
 
-    final valvesWithPressure = map.valves.where((v) => v.flowRate > 0).toList();
+    final valvesWithPressure =
+        map.valves.values.where((v) => v.flowRate > 0).toList();
     say('${valvesWithPressure.map((v) => v.name)} have pressure');
 
     valvesWithPressure.sort((a, b) => b.flowRate - a.flowRate);
@@ -494,7 +487,7 @@ class Day16P2 extends Solution {
     // and allow an extra minute to open valve AA
     // (even though it has zero pressure)
 
-    final startValve = map.valves[map.idLookup['AA']!];
+    final startValve = map.valves['AA']!;
     const clock = 26;
 
     // Set up the possible combination of first steps
