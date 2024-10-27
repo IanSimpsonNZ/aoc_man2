@@ -175,7 +175,7 @@ class Sim {
     const debugTime = 0;
 
     while (simList.isNotEmpty) {
-      final state = simList.removeAt(0);
+      final state = simList.removeLast();
       if (state.time == maxTime) {
         if (state.stock[geodeIdx] > maxGeodes) {
           maxGeodes = state.stock[geodeIdx];
@@ -224,7 +224,7 @@ class Sim {
             devtools.log('Inserting ${nameLookup[commodityIdx]}');
             printState(nextGen);
           }
-          simList.insert(0, nextGen);
+          simList.add(nextGen);
         }
       }
     }
