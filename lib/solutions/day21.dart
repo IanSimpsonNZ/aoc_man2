@@ -70,7 +70,7 @@ class Day21P1 extends Solution {
   }
 
   @override
-  Future<void> specificSolution(void Function(String) say) async {
+  Future<void> specificSolution() async {
     say('Day 21 Part 1');
 
     await getMonkeys();
@@ -180,7 +180,7 @@ class Day21P2 extends Day21P1 {
   }
 
   @override
-  Future<void> specificSolution(void Function(String) say) async {
+  Future<void> specificSolution() async {
     say('Day 21 Part 2');
 
     await getMonkeys();

@@ -185,7 +185,7 @@ class Message {
 
 class Day13P1 extends Solution {
   @override
-  Future<void> specificSolution(void Function(String) say) async {
+  Future<void> specificSolution() async {
     say('Day 13 Part 1');
 
     final messages = StreamQueue<String>(lines());
@@ -210,7 +210,7 @@ class Day13P1 extends Solution {
 
 class Day13P2 extends Solution {
   @override
-  Future<void> specificSolution(void Function(String) say) async {
+  Future<void> specificSolution() async {
     say('Day 13 Part 2');
 
     var messages = await lines()

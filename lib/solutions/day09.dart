@@ -66,7 +66,7 @@ class Rope {
 
 class Day09P1 extends Solution {
   @override
-  Future<void> specificSolution(void Function(String) say) async {
+  Future<void> specificSolution() async {
     say('Day 9 Part 1');
 
     Rope rope = Rope();
@@ -84,7 +84,7 @@ class Day09P1 extends Solution {
 
 class Day09P2 extends Solution {
   @override
-  Future<void> specificSolution(void Function(String) say) async {
+  Future<void> specificSolution() async {
     say('Day 9 Part 2');
 
     Rope rope = Rope();

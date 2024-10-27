@@ -33,7 +33,7 @@ class Number2 {
 
 class Day20P1 extends Solution {
   @override
-  Future<void> specificSolution(void Function(String) say) async {
+  Future<void> specificSolution() async {
     say('Day 20 Part 1');
 
     List<Number> message = [];
@@ -78,7 +78,7 @@ class Day20P1 extends Solution {
 
 class Day20P2 extends Solution {
   @override
-  Future<void> specificSolution(void Function(String) say) async {
+  Future<void> specificSolution() async {
     say('Day 20 Part 2');
 
     List<Number2> message = [];

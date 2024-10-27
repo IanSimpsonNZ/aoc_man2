@@ -133,7 +133,7 @@ int simulateSand(
 
 class Day14P1 extends Solution {
   @override
-  Future<void> specificSolution(void Function(String) say) async {
+  Future<void> specificSolution() async {
     say('Day 14 Part 1');
 
     bool endCondition({required Coord p, required BlockedMap map}) =>
@@ -150,7 +150,7 @@ class Day14P1 extends Solution {
 
 class Day14P2 extends Solution {
   @override
-  Future<void> specificSolution(void Function(String) say) async {
+  Future<void> specificSolution() async {
     say('Day 14 Part 2');
 
     bool endCondition({required Coord p, required BlockedMap map}) =>

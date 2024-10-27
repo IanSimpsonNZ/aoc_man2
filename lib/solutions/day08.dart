@@ -163,7 +163,7 @@ class Forrest {
 
 class Day08P1 extends Solution {
   @override
-  Future<void> specificSolution(void Function(String) say) async {
+  Future<void> specificSolution() async {
     say('Day 8 Part 1');
 
     final forrest = Forrest();
@@ -177,7 +177,7 @@ class Day08P1 extends Solution {
 
 class Day08P2 extends Solution {
   @override
-  Future<void> specificSolution(void Function(String) say) async {
+  Future<void> specificSolution() async {
     say('Day 8 Part 2');
 
     final forrest = Forrest();

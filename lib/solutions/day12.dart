@@ -71,7 +71,7 @@ class ElevationMap {
 
 class Day12P1 extends Solution {
   @override
-  Future<void> specificSolution(void Function(String) say) async {
+  Future<void> specificSolution() async {
     say('Day 12 Part 1');
 
     var map = ElevationMap();
@@ -124,7 +124,7 @@ class Day12P1 extends Solution {
 
 class Day12P2 extends Solution {
   @override
-  Future<void> specificSolution(void Function(String) say) async {
+  Future<void> specificSolution() async {
     say('Day 12 Part 2');
 
     var map = ElevationMap();

@@ -293,7 +293,7 @@ class MyIterator<T> {
 
 class Day17P1 extends Solution {
   @override
-  Future<void> specificSolution(void Function(String) say) async {
+  Future<void> specificSolution() async {
     say('Day 17 Part 1');
 
     final hLine = Shape.fromImage([
@@ -351,7 +351,7 @@ class Day17P1 extends Solution {
 
 class Day17P2 extends Solution {
   @override
-  Future<void> specificSolution(void Function(String) say) async {
+  Future<void> specificSolution() async {
     say('Day 17 Part 2');
 
     final hLine = Shape.fromImage([

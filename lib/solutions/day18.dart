@@ -190,7 +190,7 @@ class LavaBlob {
 
 class Day18P1 extends Solution {
   @override
-  Future<void> specificSolution(void Function(String) say) async {
+  Future<void> specificSolution() async {
     say('Day 18 Part 1');
 
     var blob = LavaBlob(say);
@@ -210,7 +210,7 @@ class Day18P1 extends Solution {
 
 class Day18P2 extends Solution {
   @override
-  Future<void> specificSolution(void Function(String) say) async {
+  Future<void> specificSolution() async {
     say('Day 18 Part 2');
 
     var blob = LavaBlob(say);

@@ -229,7 +229,7 @@ class ValveMap {
 
 class Day16P1 extends Solution {
   @override
-  Future<void> specificSolution(void Function(String) say) async {
+  Future<void> specificSolution() async {
     say('Day 16 Part 1');
 
     var map = ValveMap(say);
@@ -444,7 +444,7 @@ int dualMaxFlow(
 
 class Day16P2 extends Solution {
   @override
-  Future<void> specificSolution(void Function(String) say) async {
+  Future<void> specificSolution() async {
     say('Day 16 Part 2');
 
     var map = ValveMap(say);

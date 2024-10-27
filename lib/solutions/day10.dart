@@ -8,7 +8,7 @@ import 'package:aoc_manager/solutions/CPU/cpu_v2.dart';
 
 class Day10P1 extends Solution {
   @override
-  Future<void> specificSolution(void Function(String) say) async {
+  Future<void> specificSolution() async {
     say('Day 10 Part 1');
 
     int answer = 0;
@@ -25,7 +25,7 @@ class Day10P1 extends Solution {
 
 class Day10P2 extends Solution {
   @override
-  Future<void> specificSolution(void Function(String) say) async {
+  Future<void> specificSolution() async {
     say('Day 10 Part 2');
 
     CPUv2 computer = CPUv2();

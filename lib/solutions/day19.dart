@@ -235,7 +235,7 @@ class Sim {
 
 class Day19P1 extends Solution {
   @override
-  Future<void> specificSolution(void Function(String) say) async {
+  Future<void> specificSolution() async {
     say('Day 19 Part 1');
 
     const timeAllowed = 24;
@@ -261,7 +261,7 @@ class Day19P1 extends Solution {
 
 class Day19P2 extends Solution {
   @override
-  Future<void> specificSolution(void Function(String) say) async {
+  Future<void> specificSolution() async {
     say('Day 19 Part 2');
 
     const timeAllowed = 32;

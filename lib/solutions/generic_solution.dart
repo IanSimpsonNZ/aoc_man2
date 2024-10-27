@@ -29,7 +29,7 @@ class Solution {
     sendPort = newSendPort;
 
     try {
-      await specificSolution(say);
+      await specificSolution();
       say('Done');
     } catch (e) {
       final err = e as Error;
@@ -37,7 +37,7 @@ class Solution {
     }
   }
 
-  Future<void> specificSolution(void Function(String) say) async {
+  Future<void> specificSolution() async {
     say("Generic Solution");
     await for (final line in lines()) {
       await Future.delayed(const Duration(seconds: 1));

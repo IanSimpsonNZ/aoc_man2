@@ -17,7 +17,7 @@ import 'package:aoc_manager/solutions/helpers/coord.dart';
 
 class Day15P1 extends Solution {
   @override
-  Future<void> specificSolution(void Function(String) say) async {
+  Future<void> specificSolution() async {
     say('Day 15 Part 1');
 
     const targetLine = 2000000;
@@ -108,7 +108,7 @@ class Day15P2 extends Solution {
 //             -2 = Sx2 - Sx1 + Sy1 - Sy2 + rad1 + rad2
 
   @override
-  Future<void> specificSolution(void Function(String) say) async {
+  Future<void> specificSolution() async {
     say('Day 15 Part 2');
 
     const maxScan = 4000000;
