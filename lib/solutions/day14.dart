@@ -85,7 +85,7 @@ Future<BlockedMap> getBlocked(Stream<String> lines) async {
           result.blocked.add(Coord(x, p1.y));
         }
       } else {
-        devtools.log('Diagonal line? ${p1.print()} -> ${p2.print()}');
+        devtools.log('Diagonal line? ${p1.toString()} -> ${p2.toString()}');
       }
     }
   }

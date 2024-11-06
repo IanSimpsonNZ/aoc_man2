@@ -6,29 +6,9 @@ import 'dart:math' show min, max;
 // import 'dart:typed_data';
 
 import 'package:aoc_manager/solutions/generic_solution.dart';
-// import 'package:aoc_manager/solutions/helpers/coord.dart';
+import 'package:aoc_manager/solutions/helpers/coord_3d.dart';
 
 // import 'dart:developer' as devtools show log;
-
-class Coord3D {
-  int x;
-  int y;
-  int z;
-
-  Coord3D(this.x, this.y, this.z);
-
-  Coord3D operator +(Coord3D c) => Coord3D(x + c.x, y + c.y, z + c.z);
-  Coord3D operator -(Coord3D c) => Coord3D(x - c.x, y - c.y, z - c.z);
-  @override
-  bool operator ==(Object other) =>
-      other is Coord3D && x == other.x && y == other.y && z == other.z;
-  @override
-  int get hashCode => Object.hash(x, y, z);
-
-  Coord3D clone() => Coord3D(x, y, z);
-
-  String print() => '($x, $y, $z)';
-}
 
 class CubeFace {
   late final Set<Coord3D> corners;
@@ -63,7 +43,7 @@ class CubeFace {
   String print() {
     String result = '';
     for (final corner in corners) {
-      result = '$result${corner.print()} ';
+      result = '$result${corner.toString()} ';
     }
     return result;
   }

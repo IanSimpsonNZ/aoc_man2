@@ -14,5 +14,7 @@ class Coord {
 
   Coord clone() => Coord(x, y);
 
-  String print() => '($x, $y)';
+  // String print() => '($x, $y)';
+  @override
+  String toString() => '($x, $y)';
 }

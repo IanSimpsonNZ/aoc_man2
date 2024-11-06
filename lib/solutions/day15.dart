@@ -75,7 +75,7 @@ class Signal {
     return dist <= radius;
   }
 
-  String print() => 'S:${position.print()} rad: $radius';
+  String print() => 'S:${position.toString()} rad: $radius';
 }
 
 class Day15P2 extends Solution {
@@ -146,7 +146,7 @@ class Day15P2 extends Solution {
         final sig2 = signals[j];
         if (sig1.x - sig2.x + sig1.y - sig2.y + sig1.radius + sig2.radius ==
             -2) {
-          say('${sig1.position.print()} and ${sig2.position.print()} top right to bottom left');
+          say('${sig1.position.toString()} and ${sig2.position.toString()} top right to bottom left');
           if (tr == null) {
             tr = sig1;
           } else {
@@ -155,7 +155,7 @@ class Day15P2 extends Solution {
         }
         if (sig2.x - sig1.x + sig1.y - sig2.y + sig1.radius + sig2.radius ==
             -2) {
-          say('${sig1.position.print()} and ${sig2.position.print()} top left to bottom right');
+          say('${sig1.position.toString()} and ${sig2.position.toString()} top left to bottom right');
           if (tl == null) {
             tl = sig1;
           } else {
