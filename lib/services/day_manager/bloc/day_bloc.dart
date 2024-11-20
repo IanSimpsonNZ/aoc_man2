@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:convert';
-// import 'dart:isolate';
 import 'package:async/async.dart';
 
 import 'package:aoc_manager/constants/day_constants.dart';
@@ -8,32 +7,6 @@ import 'package:aoc_manager/constants/pref_constants.dart';
 import 'package:aoc_manager/services/day_manager/bloc/day_manager_event.dart';
 import 'package:aoc_manager/services/day_manager/bloc/day_manager_state.dart';
 import 'package:aoc_manager/services/day_manager/day_manager_exceptions.dart';
-// import 'package:aoc_manager/solutions/day01.dart';
-// import 'package:aoc_manager/solutions/day02.dart';
-// import 'package:aoc_manager/solutions/day03.dart';
-// import 'package:aoc_manager/solutions/day04.dart';
-// import 'package:aoc_manager/solutions/day05.dart';
-// import 'package:aoc_manager/solutions/day06.dart';
-// import 'package:aoc_manager/solutions/day07.dart';
-// import 'package:aoc_manager/solutions/day08.dart';
-// import 'package:aoc_manager/solutions/day09.dart';
-// import 'package:aoc_manager/solutions/day10.dart';
-// import 'package:aoc_manager/solutions/day11.dart';
-// import 'package:aoc_manager/solutions/day12.dart';
-// import 'package:aoc_manager/solutions/day13.dart';
-// import 'package:aoc_manager/solutions/day14.dart';
-// import 'package:aoc_manager/solutions/day15.dart';
-// import 'package:aoc_manager/solutions/day16.dart';
-// import 'package:aoc_manager/solutions/day17.dart';
-// import 'package:aoc_manager/solutions/day18.dart';
-// import 'package:aoc_manager/solutions/day19.dart';
-// import 'package:aoc_manager/solutions/day20.dart';
-// import 'package:aoc_manager/solutions/day21.dart';
-// import 'package:aoc_manager/solutions/day22.dart';
-// import 'package:aoc_manager/solutions/day23.dart';
-// import 'package:aoc_manager/solutions/day24.dart';
-// import 'package:aoc_manager/solutions/day25.dart';
-// import 'package:aoc_manager/solutions/generic_solution.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path/path.dart' show join;
@@ -58,38 +31,6 @@ class DayBloc extends Bloc<DayEvent, DayState> {
   final List<String> _pausedMessages = [];
   final List<String> _errorMessages = [];
   final List<String> _pausedErrorMessages = [];
-
-  // Solution? _solution;
-  // Capability? _pausedCapability;
-  // Isolate? _solutionTask;
-
-  // final List<List<Solution>> _solutions = [
-  //   [Day01P1(), Day01P2()], // 1
-  //   [Day02P1(), Day02P2()], // 2
-  //   [Day03P1(), Day03P2()], // 3
-  //   [Day04P1(), Day04P2()], // 4
-  //   [Day05P1(), Day05P2()], // 5
-  //   [Day06P1(), Day06P2()], // 6
-  //   [Day07P1(), Day07P2()], // 7
-  //   [Day08P1(), Day08P2()], // 8
-  //   [Day09P1(), Day09P2()], // 9
-  //   [Day10P1(), Day10P2()], // 10
-  //   [Day11P1(), Day11P2()], // 11
-  //   [Day12P1(), Day12P2()], // 12
-  //   [Day13P1(), Day13P2()], // 13
-  //   [Day14P1(), Day14P2()], // 14
-  //   [Day15P1(), Day15P2()], // 15
-  //   [Day16P1(), Day16P2()], // 16
-  //   [Day17P1(), Day17P2()], // 17
-  //   [Day18P1(), Day18P2()], // 18
-  //   [Day19P1(), Day19P2()], // 19
-  //   [Day20P1(), Day20P2()], // 20
-  //   [Day21P1(), Day21P2()], // 21
-  //   [Day22P1(), Day22P2()], // 22
-  //   [Day23P1(), Day23P2()], // 23
-  //   [Day24P1(), Day24P2()], // 24
-  //   [Day25P1(), Day25P2()], // 25
-  // ];
 
   String _dayPartKey() => '${appNamePrefKey}_${_dayNum}_part';
   String _dayDataDirKey() => '${appNamePrefKey}_${_dayNum}_dir';
@@ -356,10 +297,6 @@ class DayBloc extends Bloc<DayEvent, DayState> {
             _dispLn('Day $_dayNum, part $_partNum');
             _dispLn('Running : $progFile');
             _dispLn('Using   : $dataFile', emit: emit);
-
-            // var process = await Process.start('type', [file],
-            //     runInShell: true, mode: ProcessStartMode.detachedWithStdio);
-            // var process = await Process.start('dir', [], runInShell: true);
 
             _process =
                 await Process.start(progFile, [dataFile], runInShell: true);
