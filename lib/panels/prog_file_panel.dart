@@ -102,7 +102,7 @@ class _ProgFilePanelState extends State<ProgFilePanel> {
                                   initialDirectory: state.progDirName,
                                   allowMultiple: false,
                                   type: FileType.custom,
-                                  allowedExtensions: ['txt'],
+                                  allowedExtensions: ['exe', 'com'],
                                 );
                                 if (context.mounted) {
                                   context

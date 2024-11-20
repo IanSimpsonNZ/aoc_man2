@@ -37,7 +37,7 @@ import 'package:aoc_manager/services/day_manager/day_manager_exceptions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path/path.dart' show join;
-import 'dart:developer' as devtools show log;
+// import 'dart:developer' as devtools show log;
 
 const minTime = Duration(milliseconds: 100);
 
@@ -301,10 +301,32 @@ class DayBloc extends Bloc<DayEvent, DayState> {
     // Change root dir
     on<DayChangeRootDirEvent>(
       (event, emit) async {
-        devtools.log((await _prefs.getAll()).toString());
+        // devtools.log((await _prefs.getAll()).toString());
         if (event.newRootDir != null) {
           _rootDir = event.newRootDir;
           await _prefs.setString(rootDirPrefKey, event.newRootDir!);
+        }
+      },
+    );
+
+    // Create the directory structure
+    on<DayCreateFoldersEvent>(
+      (event, emit) async {
+        if (_rootDir == null) {
+          _dispLn('Something has gone wrong.  rootDir is null',
+              emit: emit, ensureNewLine: true);
+        } else {
+          for (int dayNum = 1; dayNum <= 25; dayNum++) {
+            final dayNumStr = dayNum.toString().padLeft(2, '0');
+            final newFolder = join(_rootDir!, 'Day$dayNumStr');
+            final createDirProcess =
+                await Process.start('mkdir', [newFolder], runInShell: true);
+            if ((await createDirProcess.exitCode) == 0) {
+              _dispLn('Created $newFolder', emit: emit);
+            } else {
+              _dispLn('Could not create $newFolder', emit: emit);
+            }
+          }
         }
       },
     );
@@ -327,16 +349,20 @@ class DayBloc extends Bloc<DayEvent, DayState> {
         if (!_isRunning) {
           if (_dataFileName != null && _dataFileName != '') {
             _isRunning = true;
-            final file = join(_dataDirName!, _dataFileName!);
+            final dataFile = join(_dataDirName!, _dataFileName!);
+            final progFile = join(_progDirName!, _progFileName!);
+
             _dispLn('');
-            _dispLn('Running solution for day $_dayNum, part $_partNum');
-            _dispLn('Using : $file', emit: emit);
+            _dispLn('Day $_dayNum, part $_partNum');
+            _dispLn('Running : $progFile');
+            _dispLn('Using   : $dataFile', emit: emit);
 
             // var process = await Process.start('type', [file],
             //     runInShell: true, mode: ProcessStartMode.detachedWithStdio);
             // var process = await Process.start('dir', [], runInShell: true);
 
-            _process = await Process.start('type', [file], runInShell: true);
+            _process =
+                await Process.start(progFile, [dataFile], runInShell: true);
 
             var stdoutSplitter = StreamSplitter(_process!.stdout
                     .transform(utf8.decoder)

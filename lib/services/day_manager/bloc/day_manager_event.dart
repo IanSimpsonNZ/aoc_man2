@@ -47,6 +47,10 @@ class DayChangeRootDirEvent extends DayEvent {
   const DayChangeRootDirEvent(this.newRootDir);
 }
 
+class DayCreateFoldersEvent extends DayEvent {
+  const DayCreateFoldersEvent();
+}
+
 class DayClearPrefsEvent extends DayEvent {
   const DayClearPrefsEvent();
 }
