@@ -467,26 +467,6 @@ class DayBloc extends Bloc<DayEvent, DayState> {
             _dispLn('Something went wrong, process is null',
                 emit: emit, ensureNewLine: true);
           }
-
-          // _solutionTask!.kill(priority: Isolate.beforeNextEvent);
-          // await Future.delayed(const Duration(seconds: 1));
-
-          // for (int i = 3; i > 0; i--) {
-          //   if (!_isRunning) break;
-          //   _disp('$i ... ', emit: emit);
-          //   await Future.delayed(const Duration(seconds: 1));
-          //   //emit(_newDayData());
-          // }
-          // if (_isRunning) {
-          //   // _isRunning will be set to false by the isolate OnExitListener if the halt request worked
-          //   //_messages.add('');
-          //   _dispLn('Halt request ignored - issuing kill request ...',
-          //       emit: emit, ensureNewLine: true);
-          //   //emit(_newDayData());
-          //   _solutionTask!.kill(priority: Isolate.immediate);
-          // }
-          // //_isRunning = false;
-          // //emit(_newDayData());
         }
       },
     );
