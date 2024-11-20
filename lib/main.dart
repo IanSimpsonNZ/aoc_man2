@@ -2,6 +2,7 @@ import 'package:aoc_manager/panels/button_panel.dart';
 import 'package:aoc_manager/panels/day_panel.dart';
 import 'package:aoc_manager/panels/file_panel.dart';
 import 'package:aoc_manager/panels/output_panel.dart';
+import 'package:aoc_manager/panels/error_panel.dart';
 import 'package:aoc_manager/panels/settings_menu.dart';
 import 'package:aoc_manager/services/day_manager/bloc/day_bloc.dart';
 import 'package:aoc_manager/services/day_manager/bloc/day_manager_event.dart';
@@ -85,28 +86,48 @@ class _MyHomePageState extends State<MyHomePage> {
           title: Text(widget.title),
           actions: const <Widget>[SettingsMenu()],
         ),
-        body: const Center(
+        body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              DayPanel(),
-              FilePanel(),
-              Padding(padding: EdgeInsets.all(10.0)),
-              ButtonPanel(),
-              Padding(padding: EdgeInsets.all(8.0)),
-              Divider(
+              const DayPanel(),
+              const FilePanel(),
+              const Padding(padding: EdgeInsets.all(10.0)),
+              const ButtonPanel(),
+              const Padding(padding: EdgeInsets.all(8.0)),
+              const Divider(
                 height: 4,
                 thickness: 2,
                 indent: 0,
                 endIndent: 0,
                 color: Colors.black,
               ),
-              Expanded(
+              Container(
+                alignment: Alignment.topLeft,
+                child: const Text('Output'),
+              ),
+              const Expanded(
                 child: Align(
                   alignment: Alignment.topCenter,
                   child: OutputPanel(),
                 ),
+              ),
+              const Divider(
+                height: 4,
+                thickness: 2,
+                indent: 0,
+                endIndent: 0,
+                color: Colors.black,
+              ),
+              Container(
+                alignment: Alignment.topLeft,
+                child: const Text('Errors'),
+              ),
+              Container(
+                alignment: Alignment.center,
+                constraints: const BoxConstraints(maxHeight: 125),
+                child: const ErrorPanel(),
               ),
             ],
           ),

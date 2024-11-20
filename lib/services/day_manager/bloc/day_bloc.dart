@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'dart:convert';
 import 'dart:isolate';
+import 'package:async/async.dart';
 
 import 'package:aoc_manager/constants/day_constants.dart';
 import 'package:aoc_manager/constants/pref_constants.dart';
@@ -37,6 +39,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path/path.dart' show join;
 import 'dart:developer' as devtools show log;
 
+const minTime = Duration(milliseconds: 100);
+
 class DayBloc extends Bloc<DayEvent, DayState> {
   final _prefs = SharedPreferencesAsync();
   String? _rootDir;
@@ -46,12 +50,16 @@ class DayBloc extends Bloc<DayEvent, DayState> {
   String? _fileName;
   bool _isRunning = false;
   bool _isPaused = false;
+  Process? _process;
 
   final List<String> _messages = [];
+  final List<String> _pausedMessages = [];
+  final List<String> _errorMessages = [];
+  final List<String> _pausedErrorMessages = [];
 
   Solution? _solution;
-  Capability? _pausedCapability;
-  Isolate? _solutionTask;
+  // Capability? _pausedCapability;
+  // Isolate? _solutionTask;
 
   final List<List<Solution>> _solutions = [
     [Day01P1(), Day01P2()], // 1
@@ -100,6 +108,7 @@ class DayBloc extends Bloc<DayEvent, DayState> {
         isRunning: _isRunning,
         isPaused: _isPaused,
         messages: _messages,
+        errorMessages: _errorMessages,
         exception,
       );
 
@@ -123,14 +132,6 @@ class DayBloc extends Bloc<DayEvent, DayState> {
     // Already have _dayNum from above
     await _getPrefsForDay();
   }
-
-  // void _addMessage(String newMessage) {
-  //   if (_messages.isEmpty) {
-  //     _messages.add(newMessage);
-  //   } else {
-  //     _messages.last = '${_messages.last}$newMessage';
-  //   }
-  // }
 
   // Display stuff on the output panel
   void _disp(String newMessage, {Emitter? emit, bool ensureNewLine = false}) {
@@ -272,31 +273,57 @@ class DayBloc extends Bloc<DayEvent, DayState> {
             _dispLn('Running solution for day $_dayNum, part $_partNum');
             _dispLn('Using : $file', emit: emit);
 
-            _solution = _solutions[_dayNum - 1][_partNum - 1];
-            _solution!.init(file);
-            final initPort = RawReceivePort();
-            _solutionTask =
-                await Isolate.spawn(_solution!.solution, initPort.sendPort);
-            _solutionTask!.addOnExitListener(initPort.sendPort, response: null);
-            final receivePort = ReceivePort.fromRawReceivePort(initPort);
+            // var process = await Process.start('type', [file],
+            //     runInShell: true, mode: ProcessStartMode.detachedWithStdio);
+            // var process = await Process.start('dir', [], runInShell: true);
 
-            await emit.forEach(
-              receivePort,
-              onData: (message) {
-                if (message is RemoteError) {
-                  return _newDayData(
-                      exception: RemoteErrorException(error: message));
-                } else {
-                  if (message is String) {
-                    _messages.add(message);
-                  } else if (message == null) {
-                    _isRunning = false;
-                    _dispLn('Process finished', ensureNewLine: true);
-                  }
-                  return _newDayData();
-                }
-              },
-            );
+            _process = await Process.start('type', [file], runInShell: true);
+
+            var stdoutSplitter = StreamSplitter(_process!.stdout
+                    .transform(utf8.decoder)
+                    .transform(const LineSplitter()))
+                .split();
+
+            var stderrSplitter = StreamSplitter(_process!.stderr
+                    .transform(utf8.decoder)
+                    .transform(const LineSplitter()))
+                .split();
+
+            stdoutSplitter.forEach((message) {
+              if (_isPaused) {
+                _pausedMessages.add(message);
+              } else {
+                _messages.add(message);
+                emit(_newDayData());
+              }
+            });
+
+            stderrSplitter.forEach((message) {
+              if (_isPaused) {
+                _pausedErrorMessages.add(message);
+              } else {
+                _errorMessages.add(message);
+                emit(_newDayData());
+              }
+            });
+
+            int exitCode = await _process!.exitCode;
+
+            while (_isPaused) {
+              await Future.delayed(minTime);
+            }
+
+            _isRunning = false;
+            await Future.delayed(minTime);
+
+            _dispLn('');
+            if (exitCode == 0) {
+              _dispLn('Process ended normally');
+            } else {
+              _dispLn('Process ended with code $exitCode');
+            }
+
+            emit(_newDayData());
           } else {
             emit(_newDayData(exception: DayNoFileSelectedException()));
           }
@@ -321,10 +348,10 @@ class DayBloc extends Bloc<DayEvent, DayState> {
       (event, emit) {
         if (_isRunning) {
           if (_isPaused) {
-            _solutionTask!.resume(_pausedCapability!);
-            _pausedCapability = null;
-          } else {
-            _pausedCapability = _solutionTask!.pause();
+            _messages.addAll(_pausedMessages);
+            _pausedMessages.clear();
+            _errorMessages.addAll(_pausedErrorMessages);
+            _pausedErrorMessages.clear();
           }
           _isPaused = !_isPaused;
           emit(_newDayData());
@@ -337,32 +364,44 @@ class DayBloc extends Bloc<DayEvent, DayState> {
       (event, emit) async {
         if (_isRunning) {
           if (_isPaused) {
-            _solutionTask!.resume(_pausedCapability!);
+            // _solutionTask!.resume(_pausedCapability!);
             _isPaused = false;
-            _pausedCapability = null;
+            // _pausedCapability = null;
           }
           _dispLn('Requesting process halt ...',
               emit: emit, ensureNewLine: true);
           //emit(_newDayData());
-          _solutionTask!.kill(priority: Isolate.beforeNextEvent);
-          await Future.delayed(const Duration(seconds: 1));
 
-          for (int i = 3; i > 0; i--) {
-            if (!_isRunning) break;
-            _disp('$i ... ', emit: emit);
-            await Future.delayed(const Duration(seconds: 1));
-            //emit(_newDayData());
-          }
-          if (_isRunning) {
-            // _isRunning will be set to false by the isolate OnExitListener if the halt request worked
-            //_messages.add('');
-            _dispLn('Halt request ignored - issuing kill request ...',
+          if (_process != null) {
+            final sigSent = _process!.kill();
+            if (sigSent) {
+              _dispLn('Sent kill signal', emit: emit, ensureNewLine: true);
+            }
+            _isRunning = false;
+          } else {
+            _dispLn('Something went wrong, process is null',
                 emit: emit, ensureNewLine: true);
-            //emit(_newDayData());
-            _solutionTask!.kill(priority: Isolate.immediate);
           }
-          //_isRunning = false;
-          //emit(_newDayData());
+
+          // _solutionTask!.kill(priority: Isolate.beforeNextEvent);
+          // await Future.delayed(const Duration(seconds: 1));
+
+          // for (int i = 3; i > 0; i--) {
+          //   if (!_isRunning) break;
+          //   _disp('$i ... ', emit: emit);
+          //   await Future.delayed(const Duration(seconds: 1));
+          //   //emit(_newDayData());
+          // }
+          // if (_isRunning) {
+          //   // _isRunning will be set to false by the isolate OnExitListener if the halt request worked
+          //   //_messages.add('');
+          //   _dispLn('Halt request ignored - issuing kill request ...',
+          //       emit: emit, ensureNewLine: true);
+          //   //emit(_newDayData());
+          //   _solutionTask!.kill(priority: Isolate.immediate);
+          // }
+          // //_isRunning = false;
+          // //emit(_newDayData());
         }
       },
     );
@@ -379,6 +418,7 @@ class DayBloc extends Bloc<DayEvent, DayState> {
     on<DayClearOutputEvent>(
       (event, emit) {
         _messages.clear();
+        _errorMessages.clear();
         emit(_newDayData());
       },
     );

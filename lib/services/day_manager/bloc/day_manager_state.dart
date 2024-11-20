@@ -22,6 +22,7 @@ class DayReady extends DayState {
   final bool isRunning;
   final bool isPaused;
   final List<String> messages;
+  final List<String> errorMessages;
   final Exception? exception;
 
   const DayReady(
@@ -34,5 +35,6 @@ class DayReady extends DayState {
     required this.isRunning,
     required this.isPaused,
     required this.messages,
+    required this.errorMessages,
   });
 }
