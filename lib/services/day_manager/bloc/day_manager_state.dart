@@ -16,8 +16,10 @@ class DayWorking extends DayState {
 class DayReady extends DayState {
   final int dayNum;
   final int partNum;
-  final String dirName;
-  final String fileName;
+  final String dataDirName;
+  final String dataFileName;
+  final String progDirName;
+  final String progFileName;
   final String rootDir;
   final bool isRunning;
   final bool isPaused;
@@ -29,8 +31,10 @@ class DayReady extends DayState {
     this.exception, {
     required this.dayNum,
     required this.partNum,
-    required this.dirName,
-    required this.fileName,
+    required this.dataDirName,
+    required this.dataFileName,
+    required this.progDirName,
+    required this.progFileName,
     required this.rootDir,
     required this.isRunning,
     required this.isPaused,

@@ -7,14 +7,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:developer' as devtools show log;
 
-class FilePanel extends StatefulWidget {
-  const FilePanel({super.key});
+class DataFilePanel extends StatefulWidget {
+  const DataFilePanel({super.key});
 
   @override
-  State<FilePanel> createState() => _FilePanelState();
+  State<DataFilePanel> createState() => _DataFilePanelState();
 }
 
-class _FilePanelState extends State<FilePanel> {
+class _DataFilePanelState extends State<DataFilePanel> {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<DayBloc, DayState>(
@@ -31,7 +31,7 @@ class _FilePanelState extends State<FilePanel> {
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: <Widget>[
                     SizedBox(
-                      width: 120,
+                      width: 150,
                       child: Text(
                         'Data Directory: ',
                         style: Theme.of(context).textTheme.bodyLarge,
@@ -40,7 +40,7 @@ class _FilePanelState extends State<FilePanel> {
                     SizedBox(
                       width: 250,
                       child: ExtendedText(
-                        state.dirName,
+                        state.dataDirName,
                         style: Theme.of(context).textTheme.bodyLarge,
                         maxLines: 1,
                         overflowWidget: const TextOverflowWidget(
@@ -58,15 +58,15 @@ class _FilePanelState extends State<FilePanel> {
                                 final selectedDir =
                                     await FilePicker.platform.getDirectoryPath(
                                   dialogTitle: 'Set data directory',
-                                  initialDirectory: state.dirName,
+                                  initialDirectory: state.dataDirName,
                                 );
                                 if (context.mounted) {
                                   context
                                       .read<DayBloc>()
-                                      .add(DayChangeDirEvent(selectedDir));
+                                      .add(DayChangeDataDirEvent(selectedDir));
                                 } else {
                                   devtools.log(
-                                      'context not moiunted for "Set Directory"');
+                                      'context not mounted for "Set Directory"');
                                 }
                               },
                         icon: const Icon(Icons.folder),
@@ -79,14 +79,14 @@ class _FilePanelState extends State<FilePanel> {
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: <Widget>[
                     SizedBox(
-                      width: 120,
+                      width: 150,
                       child: Text('Data File: ',
                           style: Theme.of(context).textTheme.bodyLarge),
                     ),
                     SizedBox(
                       width: 250,
                       child: Text(
-                        state.fileName,
+                        state.dataFileName,
                         style: Theme.of(context).textTheme.bodyLarge,
                       ),
                     ),
@@ -99,7 +99,7 @@ class _FilePanelState extends State<FilePanel> {
                                 final file =
                                     await FilePicker.platform.pickFiles(
                                   dialogTitle: 'Select data file',
-                                  initialDirectory: state.dirName,
+                                  initialDirectory: state.dataDirName,
                                   allowMultiple: false,
                                   type: FileType.custom,
                                   allowedExtensions: ['txt'],
@@ -107,10 +107,10 @@ class _FilePanelState extends State<FilePanel> {
                                 if (context.mounted) {
                                   context
                                       .read<DayBloc>()
-                                      .add(DayChangeFileEvent(file));
+                                      .add(DayChangeDataFileEvent(file));
                                 } else {
                                   devtools.log(
-                                      'context not moiunted for "Set File"');
+                                      'context not mounted for "Set File"');
                                 }
                               },
                         icon: const Icon(Icons.file_open),

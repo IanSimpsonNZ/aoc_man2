@@ -1,6 +1,7 @@
 import 'package:aoc_manager/panels/button_panel.dart';
 import 'package:aoc_manager/panels/day_panel.dart';
-import 'package:aoc_manager/panels/file_panel.dart';
+import 'package:aoc_manager/panels/data_file_panel.dart';
+import 'package:aoc_manager/panels/prog_file_panel.dart';
 import 'package:aoc_manager/panels/output_panel.dart';
 import 'package:aoc_manager/panels/error_panel.dart';
 import 'package:aoc_manager/panels/settings_menu.dart';
@@ -92,7 +93,21 @@ class _MyHomePageState extends State<MyHomePage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const DayPanel(),
-              const FilePanel(),
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 500,
+                    child: ProgFilePanel(),
+                  ),
+                  SizedBox(
+                    width: 500,
+                    child: DataFilePanel(),
+                  ),
+                ],
+              ),
+              // const DataFilePanel(),
               const Padding(padding: EdgeInsets.all(10.0)),
               const ButtonPanel(),
               const Padding(padding: EdgeInsets.all(8.0)),

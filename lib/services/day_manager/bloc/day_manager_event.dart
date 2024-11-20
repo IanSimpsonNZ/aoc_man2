@@ -21,14 +21,24 @@ class DayChangePartEvent extends DayEvent {
   const DayChangePartEvent(this.newPart);
 }
 
-class DayChangeDirEvent extends DayEvent {
+class DayChangeDataDirEvent extends DayEvent {
   final String? newDir;
-  const DayChangeDirEvent(this.newDir);
+  const DayChangeDataDirEvent(this.newDir);
 }
 
-class DayChangeFileEvent extends DayEvent {
+class DayChangeDataFileEvent extends DayEvent {
   final FilePickerResult? newFile;
-  const DayChangeFileEvent(this.newFile);
+  const DayChangeDataFileEvent(this.newFile);
+}
+
+class DayChangeProgDirEvent extends DayEvent {
+  final String? newDir;
+  const DayChangeProgDirEvent(this.newDir);
+}
+
+class DayChangeProgFileEvent extends DayEvent {
+  final FilePickerResult? newFile;
+  const DayChangeProgFileEvent(this.newFile);
 }
 
 class DayChangeRootDirEvent extends DayEvent {
